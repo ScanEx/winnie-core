@@ -5,8 +5,29 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
 
     // returns config object
     cm.define('config', [], function(cm, cb) {
+        var setDefaults = function(config) {
+            config.map = config.map || {};
+            config.map.zoom = config.map.zoom || 3;
+            config.map.center = config.map.center || [53, 82];
+            config.map.zoomControl = config.map.zoomControl || false;
+            config.map.attributionControl = config.map.attributionControl || false;
+
+            config.gmxMap = config.gmxMap || {};
+
+            config.hideControl = (typeof config.hideControl === 'boolean') ? config.gmxHideControl : {};
+            config.zoomControl = (typeof config.zoomControl === 'boolean') ? config.gmxZoomControl : {};
+            config.centerControl = (typeof config.centerControl === 'boolean') ? config.gmxCenterControl : {
+                color: 'black'
+            };
+            config.bottomControl = (typeof config.bottomControl === 'boolean') ? config.gmxBottomControl : {};
+            config.locationControl = (typeof config.locationControl === 'boolean') ? config.gmxLocationControl : {};
+            config.copyrightControl = (typeof config.copyrightControl === 'boolean') ? config.gmxCopyrightControl : {};
+
+            return config;
+        };
+
         if (typeof applicationConfig === 'object') {
-            return applicationConfig;
+            return setDefaults(applicationConfig);
         } else if (typeof applicationConfig === 'string') {
             var xhr = new XMLHttpRequest();
             xhr.open('GET', applicationConfig, true);
@@ -18,7 +39,7 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
                         console.error('invalid config');
                     }
                     if (config) {
-                        cb(config);
+                        cb(setDefaults(config));
                     } else {
                         cb(false);
                     }
@@ -39,24 +60,14 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
         return mapPlaceholder.length ? mapPlaceholder[0] : mapPlaceholder;
     });
 
-    cm.define('gmxMap', ['config', 'container'], function(cm, cb) {
+    cm.define('map', ['config', 'container'], function(cm, cb) {
+        return L.map(cm.get('container'), cm.get('config').map);
+    });
+
+    cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
         var config = cm.get('config');
-        var container = cm.get('container');
-
-        var map = L.map(container, {
-            attributionControl: false
-        }).setView([
-            (config.gmxMap && config.gmxMap.x) || 53, (config.gmxMap && config.gmxMap.y) || 82
-        ], (config.gmxMap && config.gmxMap.z) || 3);
-
-        L.gmx.loadMap(config.gmxMap && config.gmxMap.mapId, {
-            apiKey: config.gmxMap && config.gmxMap.apiKey,
-            setZIndex: true
-        }).then(function(layers) {
+        L.gmx.loadMap(config.gmxMap.mapId, config.gmxMap).then(function(layers) {
             cb({
-                getLeafletMap: function() {   
-                    return map;
-                },
                 getRawTree: function() {
                     return layers.rawTree;
                 },
@@ -67,32 +78,108 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
         });
     });
 
-    cm.define('baseLayersManager', ['gmxMap', 'config'], function(cm, cb) {
+    cm.define('baseLayersManager', ['map', 'gmxMap', 'config'], function(cm, cb) {
+        var map = cm.get('map');
         var gmxMap = cm.get('gmxMap');
         var config = cm.get('config');
-        var leafletMap = gmxMap.getLeafletMap();
+
         var baseLayers = gmxMap.getRawTree().properties.BaseLayers.trim().slice(1, -1).split(',').map(function(e) {
             return e.trim().slice(1, -1)
         });
-        if (!leafletMap.gmxBaseLayersManager) {
+        if (!map.gmxBaseLayersManager) {
             console.error('no base baseLayersManager found');
             return false;
         }
-        leafletMap.gmxBaseLayersManager.initDefaults().then(function() {
-            leafletMap.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
-            cb(leafletMap.gmxBaseLayersManager);
+        map.gmxBaseLayersManager.initDefaults().then(function() {
+            map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
+            cb(map.gmxBaseLayersManager);
         });
     });
 
-    // cm.define('layersDebugger', ['layersTree'], function(cm) {
-    //     var layersTree = cm.get('layersTree');
-    //     var ld = window.ld = {
-    //         trace: function() {
-    //             layersTree.eachNode(function(node) {
-    //                 console.log([Array(node.get('depth') + 1).join('-'), node.get('properties').title, node.get('properties').LayerID || node.get('properties').GroupID, node.get('visible')].join(' '));
-    //             });
-    //         }
-    //     };
-    //     return ld;
-    // });
+    cm.define('logoControl', ['map', 'config'], function(cm) {
+        var opts = cm.get('config').copyrightControl;
+        var ctrl = L.control.gmxLogo(
+            (typeof opts === 'object') ? opts : {}
+        );
+        cm.get('map').addControl(ctrl);
+        return ctrl;
+    });
+
+    cm.define('hideControl', ['map', 'config'], function(cm) {
+        var opts = cm.get('config').hideControl;
+        if (opts) {
+            var ctrl = L.control.gmxHide(
+                (typeof opts === 'object') ? opts : {}
+            );
+            cm.get('map').addControl(ctrl);
+            return ctrl;
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('zoomControl', ['map', 'config'], function(cm) {
+        var opts = cm.get('config').zoomControl;
+        if (opts) {
+            var ctrl = L.control.gmxZoom(
+                (typeof opts === 'object') ? opts : {}
+            );
+            cm.get('map').addControl(ctrl);
+            return ctrl;
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('centerControl', ['map', 'config'], function(cm) {
+        var opts = cm.get('config').centerControl;
+        if (opts) {
+            var ctrl = L.control.gmxCenter(
+                (typeof opts === 'object') ? opts : {}
+            );
+            cm.get('map').addControl(ctrl);
+            return ctrl;
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('bottomControl', ['map', 'config'], function(cm) {
+        var opts = cm.get('config').bottomControl;
+        if (opts) {
+            var ctrl = L.control.gmxBottom(
+                (typeof opts === 'object') ? opts : {}
+            );
+            cm.get('map').addControl(ctrl);
+            return ctrl;
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('locationControl', ['map', 'config'], function(cm) {
+        var opts = cm.get('config').locationControl;
+        if (opts) {
+            var ctrl = L.control.gmxLocation(
+                (typeof opts === 'object') ? opts : {}
+            );
+            cm.get('map').addControl(ctrl);
+            return ctrl;
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('copyrightControl', ['map', 'config'], function(cm) {
+        var opts = cm.get('config').copyrightControl;
+        if (opts) {
+            var ctrl = L.control.gmxCopyright(
+                (typeof opts === 'object') ? opts : {}
+            );
+            cm.get('map').addControl(ctrl);
+            return ctrl;
+        } else {
+            return null;
+        }
+    });
 };
