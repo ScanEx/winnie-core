@@ -3,6 +3,16 @@ var nsGmx = nsGmx || {};
 nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, componentsManager) {
     var cm = componentsManager || window.cm;
 
+    var clone = function(o) {
+        var c = {};
+        for (k in o) {
+            if (o.hasOwnProperty(k)) {
+                c[k] = o[k];
+            }
+        }
+        return c;
+    };
+
     // returns config object
     cm.define('config', [], function(cm, cb) {
         var setDefaults = function(config) {
@@ -14,14 +24,14 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
 
             config.gmxMap = config.gmxMap || {};
 
-            config.hideControl = (typeof config.hideControl === 'boolean') ? config.gmxHideControl : {};
-            config.zoomControl = (typeof config.zoomControl === 'boolean') ? config.gmxZoomControl : {};
-            config.centerControl = (typeof config.centerControl === 'boolean') ? config.gmxCenterControl : {
+            config.hideControl = (config.hideControl || (typeof config.hideControl === 'boolean')) ? config.hideControl : {};
+            config.zoomControl = (config.zoomControl || (typeof config.zoomControl === 'boolean')) ? config.zoomControl : {};
+            config.centerControl = (config.centerControl || (typeof config.centerControl === 'boolean')) ? config.centerControl : {
                 color: 'black'
             };
-            config.bottomControl = (typeof config.bottomControl === 'boolean') ? config.gmxBottomControl : {};
-            config.locationControl = (typeof config.locationControl === 'boolean') ? config.gmxLocationControl : {};
-            config.copyrightControl = (typeof config.copyrightControl === 'boolean') ? config.gmxCopyrightControl : {};
+            config.bottomControl = (config.bottomControl || (typeof config.bottomControl === 'boolean')) ? config.bottomControl : {}
+            config.locationControl = (config.locationControl || (typeof config.locationControl === 'boolean')) ? config.locationControl : {}
+            config.copyrightControl = (config.copyrightControl || (typeof config.copyrightControl === 'boolean')) ? config.copyrightControl : {}
 
             return config;
         };
@@ -61,12 +71,20 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
     });
 
     cm.define('map', ['config', 'container'], function(cm, cb) {
-        return L.map(cm.get('container'), cm.get('config').map);
+        var config = cm.get('config')
+        var opts = clone(config.map);
+        if (config.zoomControl === 'leaflet') {
+            opts.zoomControl = true;
+        }
+        if (config.copyrightControl === 'leaflet') {
+            opts.attributionControl = true;
+        }
+        return L.map(cm.get('container'), opts);
     });
 
     cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
         var config = cm.get('config');
-        L.gmx.loadMap(config.gmxMap.mapId, config.gmxMap).then(function(layers) {
+        L.gmx.loadMap(config.gmxMap.mapID, config.gmxMap).then(function(layers) {
             cb({
                 getRawTree: function() {
                     return layers.rawTree;
@@ -120,7 +138,7 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
 
     cm.define('zoomControl', ['map', 'config'], function(cm) {
         var opts = cm.get('config').zoomControl;
-        if (opts) {
+        if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxZoom(
                 (typeof opts === 'object') ? opts : {}
             );
@@ -172,7 +190,7 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
 
     cm.define('copyrightControl', ['map', 'config'], function(cm) {
         var opts = cm.get('config').copyrightControl;
-        if (opts) {
+        if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxCopyright(
                 (typeof opts === 'object') ? opts : {}
             );
