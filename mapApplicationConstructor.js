@@ -23,6 +23,7 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
             config.map.attributionControl = config.map.attributionControl || false;
 
             config.gmxMap = config.gmxMap || {};
+            config.gmxMap.setZIndex = (typeof config.gmxMap.setZIndex === 'boolean') ? config.gmxMap.setZIndex : true;
 
             config.hideControl = (config.hideControl || (typeof config.hideControl === 'boolean')) ? config.hideControl : {};
             config.zoomControl = (config.zoomControl || (typeof config.zoomControl === 'boolean')) ? config.zoomControl : {};
