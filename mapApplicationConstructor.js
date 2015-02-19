@@ -1,7 +1,8 @@
 var nsGmx = nsGmx || {};
 
-nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, componentsManager) {
-    var cm = componentsManager || window.cm;
+nsGmx.createMapApplication = function(container, applicationConfig) {
+    var ComponentsManager = window.cm.ComponentsManager;
+    var cm = new ComponentsManager();
 
     var clone = function(o) {
         var c = {};
@@ -43,7 +44,7 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
             var xhr = new XMLHttpRequest();
             xhr.open('GET', applicationConfig, true);
             xhr.addEventListener('load', function(pe) {
-                if (pe.status === 200) {
+                if (pe.currentTarget.status === 200) {
                     try {
                         var config = JSON.parse(pe.currentTarget.response);
                     } catch (e) {
@@ -68,7 +69,7 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
 
     // returns DOM element
     cm.define('container', [], function() {
-        return mapPlaceholder.length ? mapPlaceholder[0] : mapPlaceholder;
+        return container.length ? container[0] : container;
     });
 
     cm.define('map', ['config', 'container'], function(cm, cb) {
@@ -201,4 +202,6 @@ nsGmx.createMapApplication = function(mapPlaceholder, applicationConfig, compone
             return null;
         }
     });
+
+    return cm;
 };
