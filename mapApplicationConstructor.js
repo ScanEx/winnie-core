@@ -14,6 +14,15 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         return c;
     };
 
+    var extend = function(a, b) {
+        for (p in b) {
+            if (b.hasOwnProperty(p)) {
+                a[p] = b[p];
+            }
+        }
+        return a;
+    };
+
     // returns config object
     cm.define('config', [], function(cm, cb) {
         var setDefaults = function(config) {
@@ -31,9 +40,13 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
             config.centerControl = (config.centerControl || (typeof config.centerControl === 'boolean')) ? config.centerControl : {
                 color: 'black'
             };
-            config.bottomControl = (config.bottomControl || (typeof config.bottomControl === 'boolean')) ? config.bottomControl : {}
-            config.locationControl = (config.locationControl || (typeof config.locationControl === 'boolean')) ? config.locationControl : {}
-            config.copyrightControl = (config.copyrightControl || (typeof config.copyrightControl === 'boolean')) ? config.copyrightControl : {}
+            config.bottomControl = (config.bottomControl || (typeof config.bottomControl === 'boolean')) ? config.bottomControl : {};
+            config.locationControl = (config.locationControl || (typeof config.locationControl === 'boolean')) ? config.locationControl : {};
+            config.copyrightControl = (config.copyrightControl || (typeof config.copyrightControl === 'boolean')) ? config.copyrightControl : {};
+
+            config.baseLayersControl = (config.baseLayersControl || (typeof config.baseLayersControl === 'boolean')) ? config.baseLayersControl : {};
+
+            config.language = (config.language === 'eng') ? 'eng' : 'rus';
 
             return config;
         };
@@ -114,6 +127,21 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
             map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
             cb(map.gmxBaseLayersManager);
         });
+    });
+
+    cm.define('baseLayersControl', ['map', 'baseLayersManager'], function(cm, cb) {
+        var map = cm.get('map');
+        var config = cm.get('config');
+        var baseLayersManager = cm.get('baseLayersManager');
+        if (config.baseLayersControl) {
+            var ctrl = new nsGmx.BaseLayersControl(baseLayersManager, extend(config.baseLayersControl, {
+                language: config.language
+            }));
+            map.addControl(ctrl);
+            return ctrl;
+        } else {
+            return null;
+        }
     });
 
     cm.define('logoControl', ['map', 'config'], function(cm) {
