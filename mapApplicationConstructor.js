@@ -80,6 +80,12 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         }
     });
 
+    cm.define('i18n', ['config'], function(cm) {
+        var config = cm.get('config');
+        L.gmxLocale.setLanguage(config.language);
+        return null;
+    });
+
     // returns DOM element
     cm.define('container', [], function() {
         return container.length ? container[0] : container;
@@ -129,7 +135,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         });
     });
 
-    cm.define('baseLayersControl', ['map', 'baseLayersManager'], function(cm, cb) {
+    cm.define('baseLayersControl', ['map', 'baseLayersManager', 'i18n'], function(cm, cb) {
         var map = cm.get('map');
         var config = cm.get('config');
         var baseLayersManager = cm.get('baseLayersManager');
@@ -144,7 +150,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('logoControl', ['map', 'config'], function(cm) {
+    cm.define('logoControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').copyrightControl;
         var ctrl = L.control.gmxLogo(
             (typeof opts === 'object') ? opts : {}
@@ -153,7 +159,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         return ctrl;
     });
 
-    cm.define('hideControl', ['map', 'config'], function(cm) {
+    cm.define('hideControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').hideControl;
         if (opts) {
             var ctrl = L.control.gmxHide(
@@ -166,7 +172,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('zoomControl', ['map', 'config'], function(cm) {
+    cm.define('zoomControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').zoomControl;
         if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxZoom(
@@ -179,7 +185,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('centerControl', ['map', 'config'], function(cm) {
+    cm.define('centerControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').centerControl;
         if (opts) {
             var ctrl = L.control.gmxCenter(
@@ -192,7 +198,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('bottomControl', ['map', 'config'], function(cm) {
+    cm.define('bottomControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').bottomControl;
         if (opts) {
             var ctrl = L.control.gmxBottom(
@@ -205,7 +211,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('locationControl', ['map', 'config'], function(cm) {
+    cm.define('locationControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').locationControl;
         if (opts) {
             var ctrl = L.control.gmxLocation(
@@ -218,7 +224,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('copyrightControl', ['map', 'config'], function(cm) {
+    cm.define('copyrightControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').copyrightControl;
         if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxCopyright(
