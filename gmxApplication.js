@@ -1,6 +1,6 @@
 var nsGmx = nsGmx || {};
 
-nsGmx.createMapApplication = function(container, applicationConfig) {
+nsGmx.createGmxApplication = function(container, applicationConfig) {
     var ComponentsManager = window.cm.ComponentsManager;
     var cm = new ComponentsManager();
 
@@ -87,11 +87,25 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
     });
 
     // returns DOM element
-    cm.define('container', [], function() {
-        return container.length ? container[0] : container;
+    cm.define('layoutManager', ['config'], function() {
+        var rootContainer = container.length ? container[0] : container;
+        L.DomUtil.addClass(rootContainer, 'gmxApplication-rootContainer');
+        var widgetsContainer = L.DomUtil.create('div', 'gmxApplication-widgetsContainer', rootContainer);
+        var mapContainer = L.DomUtil.create('div', 'gmxApplication-mapContainer', rootContainer);
+        return {
+            getRootContainer: function() {
+                return rootContainer;
+            },
+            getMapContainer: function() {
+                return mapContainer;
+            },
+            getWidgetsContainer: function() {
+                return widgetsContainer;
+            }
+        }
     });
 
-    cm.define('map', ['config', 'container'], function(cm, cb) {
+    cm.define('map', ['config', 'layoutManager'], function(cm, cb) {
         var config = cm.get('config')
         var opts = clone(config.map);
         if (config.zoomControl === 'leaflet') {
@@ -100,7 +114,7 @@ nsGmx.createMapApplication = function(container, applicationConfig) {
         if (config.copyrightControl === 'leaflet') {
             opts.attributionControl = true;
         }
-        return L.map(cm.get('container'), opts);
+        return L.map(cm.get('layoutManager').getMapContainer(), opts);
     });
 
     cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
