@@ -4,3 +4,4 @@
 
 .gmxApplication-mapContainer { z-index: 1010; }
 .gmxApplication-widgetsContainer { z-index: 1020; pointer-events: none; }
+.gmxApplication-widgetsContainer .ui-widget { pointer-events: auto; }

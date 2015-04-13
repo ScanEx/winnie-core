@@ -48,6 +48,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
             config.language = (config.language === 'eng') ? 'eng' : 'rus';
 
+            config.storytellingWidget = config.storytellingWidget || false;
+
             return config;
         };
 
@@ -59,7 +61,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             xhr.addEventListener('load', function(pe) {
                 if (pe.currentTarget.status === 200) {
                     try {
-                        var config = JSON.parse(pe.currentTarget.response);
+                        var config = JSON.parse(pe.currentTarget.response || pe.currentTarget.responseText);
                     } catch (e) {
                         console.error('invalid config');
                     }
@@ -246,6 +248,23 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             );
             cm.get('map').addControl(ctrl);
             return ctrl;
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('storytellingWidget', ['map', 'config', 'gmxMap'], function(cm) {
+        var config = cm.get('config');
+        var layoutManager = cm.get('layoutManager');
+        var gmxMap = cm.get('gmxMap');
+        if (config.storytellingWidget) {
+            var storytellingWidget = new nsGmx.StorytellingWidget({
+                bookmarks: JSON.parse(gmxMap.getRawTree().properties.UserData).tabs
+            });
+
+            storytellingWidget.appendTo(layoutManager.getWidgetsContainer());
+
+            return storytellingWidget;
         } else {
             return null;
         }
