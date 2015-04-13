@@ -257,12 +257,20 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var layoutManager = cm.get('layoutManager');
         var gmxMap = cm.get('gmxMap');
+        var map = cm.get('map');
         if (config.storytellingWidget) {
             var storytellingWidget = new nsGmx.StorytellingWidget({
                 bookmarks: JSON.parse(gmxMap.getRawTree().properties.UserData).tabs
             });
 
             storytellingWidget.appendTo(layoutManager.getWidgetsContainer());
+
+            storytellingWidget.on('storyChanged', function(story) {
+                map.panTo(L.Projection.Mercator.unproject(new L.Point(
+                    story.state.position.x,
+                    story.state.position.y
+                )));
+            });
 
             return storytellingWidget;
         } else {
