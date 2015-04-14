@@ -253,6 +253,76 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
+    cm.define('layersTree', ['gmxMap'], function(cm) {
+        if (nsGmx && nsGmx.LayersTreeNode) {
+            var rawTree = cm.get('gmxMap').getRawTree();
+            return new nsGmx.LayersTreeNode({
+                content: rawTree
+            });
+        } else {
+            return false;
+        }
+    });
+
+    // компонент, управляющий отображением слоёв на карте
+    // В нормальном порядке просто отображает видимые слои из layersTree,
+    // однако позволяет запретить отображать какой-либо слой, тем самым 
+    // передавая управляение его видимостью
+    cm.define('layersMapper', ['map', 'gmxMap', 'layersTree'], function() {
+        var map = cm.get('map');
+        var layersHash = cm.get('gmxMap').getLayersHash();
+        var layersTree = cm.get('layersTree');
+
+        if (!map || !layersHash || !layersTree) {
+            return false;
+        }
+
+        var blacklist = [];
+
+        layersTree.on('childChange', function(model) {
+            if (model.changedAttributes().hasOwnProperty('visible')) {
+                var id = model.get('properties').LayerID || model.get('properties').GroupID;
+                if (model.changedAttributes().visible) {
+                    layersHash[id] && (blacklist.indexOf(id) === -1) && map.addLayer(layersHash[id]);
+                } else {
+                    layersHash[id] && (blacklist.indexOf(id) === -1) && map.removeLayer(layersHash[id]);
+                }
+            }
+        });
+
+        layersTree.eachNode(function(model) {
+            if (model.get('visible')) {
+                var id = model.get('properties').LayerID;
+                layersHash[id] && map.addLayer(layersHash[id]);
+            }
+        }, true);
+
+        var allowLayer = function(id) {
+            (blacklist.indexOf(id) !== -1) && blacklist.splice(blacklist.indexOf(id), 1);
+        };
+
+        var denyLayer = function(id) {
+            (blacklist.indexOf(id) === -1) && layersHash[id] && blacklist.push(id);
+        };
+
+        var addLayer = function(id) {
+            allowLayer(id);
+            layersHash[id] && map.addLayer(layersHash[id]);
+        };
+
+        var removeLayer = function(id) {
+            denyLayer(id);
+            layersHash[id] && map.removeLayer(layersHash[id]);
+        };
+
+        return {
+            allowLayer: allowLayer,
+            denyLayer: denyLayer,
+            addLayer: addLayer,
+            removeLayer: removeLayer
+        }
+    });
+
     cm.define('storytellingWidget', ['map', 'config', 'gmxMap'], function(cm) {
         var config = cm.get('config');
         var layoutManager = cm.get('layoutManager');
