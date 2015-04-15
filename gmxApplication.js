@@ -253,6 +253,39 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
+    cm.define('calendar', [], function(cm) {
+        if (Backbone) {
+            return new (Backbone.Model.extend({
+                initialize: function () {
+                    this.on('change:dateBegin', function() {
+                        this.trigger('datechange', [this.get('dateBegin'), this.get('dateEnd')]);
+                    }.bind(this));
+                    this.on('change:dateEnd', function() {
+                        this.trigger('datechange', [this.get('dateBegin'), this.get('dateEnd')]);
+                    }.bind(this));
+                },
+                setDateBegin: function(dateBegin) {
+                    this.set({
+                        dateBegin: dateBegin
+                    });
+                },
+                setDateEnd: function(dateEnd) {
+                    this.set({
+                        dateEnd: dateEnd
+                    });
+                },
+                getDateBegin: function() {
+                    return this.get('dateBegin');
+                },
+                getDateEnd: function() {
+                    return this.get('dateEnd');
+                }
+            }))();
+        } else {
+            return false;
+        }
+    });
+
     cm.define('layersTree', ['gmxMap'], function(cm) {
         if (nsGmx && nsGmx.LayersTreeNode) {
             var rawTree = cm.get('gmxMap').getRawTree();
@@ -268,7 +301,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     // В нормальном порядке просто отображает видимые слои из layersTree,
     // однако позволяет запретить отображать какой-либо слой, тем самым 
     // передавая управляение его видимостью
-    cm.define('layersMapper', ['map', 'gmxMap', 'layersTree'], function() {
+    cm.define('layersMapper', ['map', 'gmxMap', 'layersTree'], function(cm) {
         var map = cm.get('map');
         var layersHash = cm.get('gmxMap').getLayersHash();
         var layersTree = cm.get('layersTree');
@@ -323,11 +356,25 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('storytellingWidget', ['map', 'config', 'gmxMap'], function(cm) {
+    cm.define('dateMapper', ['gmxMap', 'calendar'], function(cm) {
+        var layersHash = cm.get('gmxMap').getLayersHash();
+        var calendar = cm.get('calendar');
+        calendar.on('datechange', function(dateBegin, dateEnd) {
+            for (layer in layersHash) {
+                if (layersHash.hasOwnProperty(layer)) {
+                    layersHash[layer].setDateInterval(calendar.getDateBegin(), calendar.getDateEnd());
+                }
+            }
+        });
+        return null;
+    });
+
+    cm.define('storytellingWidget', ['map', 'config', 'gmxMap', 'calendar'], function(cm) {
         var config = cm.get('config');
         var layoutManager = cm.get('layoutManager');
         var gmxMap = cm.get('gmxMap');
         var map = cm.get('map');
+        var calendar = cm.get('calendar');
         if (config.storytellingWidget) {
             var storytellingWidget = new nsGmx.StorytellingWidget({
                 bookmarks: JSON.parse(gmxMap.getRawTree().properties.UserData).tabs
@@ -340,6 +387,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     story.state.position.x,
                     story.state.position.y
                 )));
+
+                calendar.setDateBegin(new Date(story.state.customParamsCollection.commonCalendar.dateBegin));
+                calendar.setDateEnd(new Date(story.state.customParamsCollection.commonCalendar.dateEnd));
             });
 
             return storytellingWidget;
