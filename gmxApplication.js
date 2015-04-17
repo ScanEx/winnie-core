@@ -50,6 +50,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
             config.storytellingWidget = config.storytellingWidget || false;
 
+            config.sidebarWidget = config.sidebarWidget || !!config.layersTreeWidget || false;
+
             return config;
         };
 
@@ -373,6 +375,22 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var layoutManager = cm.get('layoutManager');
         if (config.sidebarWidget && L.Control.Sidebar) {
             return new L.Control.Sidebar(layoutManager.getWidgetsContainer());
+        } else {
+            return false;
+        }
+    });
+
+    cm.define('layersTreeWidget', ['config', 'layersTree', 'sidebarWidget'], function(cm) {
+        var config = cm.get('config');
+        var sidebar = cm.get('sidebarWidget');
+        var layersTree = cm.get('layersTree');
+        if (config.layersTreeWidget && nsGmx.LayersTreeWidget && layersTree && sidebar) {
+            var container = sidebar.addTab('sidebarTab-layersTree', 'icon-layers');
+            var layersTreeWidget = new nsGmx.LayersTreeWidget({
+                layersTree: layersTree
+            });
+            layersTreeWidget.appendTo(container);
+            return layersTreeWidget;
         } else {
             return false;
         }
