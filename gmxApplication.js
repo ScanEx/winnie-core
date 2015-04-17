@@ -256,13 +256,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('calendar', [], function(cm) {
         if (Backbone) {
-            return new (Backbone.Model.extend({
+            var cal = new (Backbone.Model.extend({
                 initialize: function () {
                     this.on('change:dateBegin', function() {
-                        this.trigger('datechange', [this.get('dateBegin'), this.get('dateEnd')]);
+                        this.trigger('datechange', this.get('dateBegin'), this.get('dateEnd'));
                     }.bind(this));
                     this.on('change:dateEnd', function() {
-                        this.trigger('datechange', [this.get('dateBegin'), this.get('dateEnd')]);
+                        this.trigger('datechange', this.get('dateBegin'), this.get('dateEnd'));
                     }.bind(this));
                 },
                 setDateBegin: function(dateBegin) {
@@ -282,6 +282,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     return this.get('dateEnd');
                 }
             }))();
+
+            var now = new Date()
+
+            cal.setDateBegin(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+            cal.setDateEnd(new Date());
+
+            return cal;
         } else {
             return false;
         }
@@ -360,13 +367,18 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     cm.define('dateMapper', ['gmxMap', 'calendar'], function(cm) {
         var layersHash = cm.get('gmxMap').getLayersHash();
         var calendar = cm.get('calendar');
-        calendar.on('datechange', function(dateBegin, dateEnd) {
+        
+        var mapDate = function(dateBegin, dateEnd) {
             for (layer in layersHash) {
                 if (layersHash.hasOwnProperty(layer)) {
-                    layersHash[layer].setDateInterval(calendar.getDateBegin(), calendar.getDateEnd());
+                    layersHash[layer].setDateInterval(dateBegin, dateEnd);
                 }
             }
-        });
+        };
+
+        calendar.on('datechange', mapDate);
+        mapDate(calendar.getDateBegin(), calendar.getDateEnd());
+        
         return null;
     });
 
