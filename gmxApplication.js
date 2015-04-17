@@ -88,7 +88,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
-    // returns DOM element
     cm.define('layoutManager', ['config'], function() {
         var rootContainer = container.length ? container[0] : container;
         L.DomUtil.addClass(rootContainer, 'gmxApplication-rootContainer');
@@ -367,6 +366,16 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             }
         });
         return null;
+    });
+
+    cm.define('sidebarWidget', ['config', 'layoutManager'], function(cm) {
+        var config = cm.get('config');
+        var layoutManager = cm.get('layoutManager');
+        if (config.sidebarWidget && L.Control.Sidebar) {
+            return new L.Control.Sidebar(layoutManager.getWidgetsContainer());
+        } else {
+            return false;
+        }
     });
 
     cm.define('storytellingWidget', ['map', 'config', 'gmxMap', 'calendar'], function(cm) {
