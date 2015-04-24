@@ -48,8 +48,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
             config.language = (config.language === 'eng') ? 'eng' : 'rus';
 
-            config.storytellingWidget = config.storytellingWidget || false;
+            config.layersMapper = (config.layersMapper || typeof config.layersMapper === 'boolean') ? config.layersMapper : true;
 
+            config.storytellingWidget = config.storytellingWidget || false;
             config.sidebarWidget = config.sidebarWidget || !!config.layersTreeWidget || false;
 
             return config;
@@ -256,8 +257,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('calendar', [], function(cm) {
         if (Backbone) {
-            var cal = new (Backbone.Model.extend({
-                initialize: function () {
+            var cal = new(Backbone.Model.extend({
+                initialize: function() {
                     this.on('change:dateBegin', function() {
                         this.trigger('datechange', this.get('dateBegin'), this.get('dateEnd'));
                     }.bind(this));
@@ -309,65 +310,70 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     // В нормальном порядке просто отображает видимые слои из layersTree,
     // однако позволяет запретить отображать какой-либо слой, тем самым 
     // передавая управляение его видимостью
-    cm.define('layersMapper', ['map', 'gmxMap', 'layersTree'], function(cm) {
+    cm.define('layersMapper', ['config', 'map', 'gmxMap', 'layersTree'], function(cm) {
         var map = cm.get('map');
         var layersHash = cm.get('gmxMap').getLayersHash();
         var layersTree = cm.get('layersTree');
+        var config = cm.get('config');
 
-        if (!map || !layersHash || !layersTree) {
-            return false;
-        }
+        if (config.layersMapper) {
+            if (!map || !layersHash || !layersTree) {
+                return false;
+            }
 
-        var blacklist = [];
+            var blacklist = [];
 
-        layersTree.on('childChange', function(model) {
-            if (model.changedAttributes().hasOwnProperty('visible')) {
-                var id = model.get('properties').LayerID || model.get('properties').GroupID;
-                if (model.changedAttributes().visible) {
-                    layersHash[id] && (blacklist.indexOf(id) === -1) && map.addLayer(layersHash[id]);
-                } else {
-                    layersHash[id] && (blacklist.indexOf(id) === -1) && map.removeLayer(layersHash[id]);
+            layersTree.on('childChange', function(model) {
+                if (model.changedAttributes().hasOwnProperty('visible')) {
+                    var id = model.get('properties').LayerID || model.get('properties').GroupID;
+                    if (model.changedAttributes().visible) {
+                        layersHash[id] && (blacklist.indexOf(id) === -1) && map.addLayer(layersHash[id]);
+                    } else {
+                        layersHash[id] && (blacklist.indexOf(id) === -1) && map.removeLayer(layersHash[id]);
+                    }
                 }
-            }
-        });
+            });
 
-        layersTree.eachNode(function(model) {
-            if (model.get('visible')) {
-                var id = model.get('properties').LayerID;
+            layersTree.eachNode(function(model) {
+                if (model.get('visible')) {
+                    var id = model.get('properties').LayerID;
+                    layersHash[id] && map.addLayer(layersHash[id]);
+                }
+            }, true);
+
+            var allowLayer = function(id) {
+                (blacklist.indexOf(id) !== -1) && blacklist.splice(blacklist.indexOf(id), 1);
+            };
+
+            var denyLayer = function(id) {
+                (blacklist.indexOf(id) === -1) && layersHash[id] && blacklist.push(id);
+            };
+
+            var addLayer = function(id) {
+                allowLayer(id);
                 layersHash[id] && map.addLayer(layersHash[id]);
+            };
+
+            var removeLayer = function(id) {
+                denyLayer(id);
+                layersHash[id] && map.removeLayer(layersHash[id]);
+            };
+
+            return {
+                allowLayer: allowLayer,
+                denyLayer: denyLayer,
+                addLayer: addLayer,
+                removeLayer: removeLayer
             }
-        }, true);
-
-        var allowLayer = function(id) {
-            (blacklist.indexOf(id) !== -1) && blacklist.splice(blacklist.indexOf(id), 1);
-        };
-
-        var denyLayer = function(id) {
-            (blacklist.indexOf(id) === -1) && layersHash[id] && blacklist.push(id);
-        };
-
-        var addLayer = function(id) {
-            allowLayer(id);
-            layersHash[id] && map.addLayer(layersHash[id]);
-        };
-
-        var removeLayer = function(id) {
-            denyLayer(id);
-            layersHash[id] && map.removeLayer(layersHash[id]);
-        };
-
-        return {
-            allowLayer: allowLayer,
-            denyLayer: denyLayer,
-            addLayer: addLayer,
-            removeLayer: removeLayer
+        } else {
+            return null;
         }
     });
 
     cm.define('dateMapper', ['gmxMap', 'calendar'], function(cm) {
         var layersHash = cm.get('gmxMap').getLayersHash();
         var calendar = cm.get('calendar');
-        
+
         var mapDate = function(dateBegin, dateEnd) {
             for (layer in layersHash) {
                 if (layersHash.hasOwnProperty(layer)) {
@@ -378,7 +384,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
         calendar.on('datechange', mapDate);
         mapDate(calendar.getDateBegin(), calendar.getDateEnd());
-        
+
         return null;
     });
 
