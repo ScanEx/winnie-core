@@ -394,7 +394,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (config.sidebarWidget && L.Control.Sidebar) {
             return new L.Control.Sidebar(layoutManager.getWidgetsContainer());
         } else {
-            return false;
+            return null;
         }
     });
 
@@ -410,7 +410,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             layersTreeWidget.appendTo(container);
             return layersTreeWidget;
         } else {
-            return false;
+            return null;
         }
     });
 
