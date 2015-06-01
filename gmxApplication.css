@@ -1,9 +1,9 @@
 .gmxApplication-rootContainer { position: relative; width: 100%; height: 100%; }
 .gmxApplication-mapContainer { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
-.gmxApplication-widgetsContainer { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+.gmxApplication-widgetsContainer { position: absolute; top: 10px; bottom: 10px; left: 10px; right: 10px; }
 
 .gmxApplication-mapContainer { z-index: 1010; }
 .gmxApplication-widgetsContainer { z-index: 1020; pointer-events: none; }
 .gmxApplication-widgetsContainer .ui-widget, .gmxApplication-widgetsContainer .sidebar { pointer-events: auto; }
 
-.gmxApplication-widgetsContainer .sidebar.sidebar-tabs-expanded { bottom: 30px; }
+.gmxApplication-widgetsContainer .sidebar.sidebar-tabs-expanded { bottom: 20px; }
