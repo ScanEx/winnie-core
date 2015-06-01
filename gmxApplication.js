@@ -4,7 +4,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     var ComponentsManager = window.cm.ComponentsManager;
     var cm = new ComponentsManager();
 
-    var clone = function(o) {
+    function clone(o) {
         var c = {};
         for (k in o) {
             if (o.hasOwnProperty(k)) {
@@ -12,16 +12,37 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             }
         }
         return c;
-    };
+    }
 
-    var extend = function(a, b) {
+    function extend(a, b) {
         for (p in b) {
             if (b.hasOwnProperty(p)) {
                 a[p] = b[p];
             }
         }
         return a;
-    };
+    }
+
+    function isMobileBrowser() {
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function isPhoneBrowser() {
+        return isMobileBrowser() && (screen.width <= 768);
+    }
+
+    cm.define('utils', [], function() {
+        return {
+            extend: extend,
+            clone: clone,
+            isMobileBrowser: isMobileBrowser,
+            isPhoneBrowser: isPhoneBrowser
+        }
+    });
 
     // returns config object
     cm.define('config', [], function(cm, cb) {
