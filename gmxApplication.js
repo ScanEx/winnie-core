@@ -413,7 +413,20 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var layoutManager = cm.get('layoutManager');
         if (config.sidebarWidget && L.Control.Sidebar) {
-            return new L.Control.Sidebar(layoutManager.getWidgetsContainer());
+            var sidebarWidget = new L.Control.Sidebar(layoutManager.getWidgetsContainer());
+            sidebarWidget.on('opened', function() {
+                var map = cm.get('map')
+                if (isPhoneBrowser() && map) {
+                    map.getContainer().style.display = 'none';
+                }
+            });
+            sidebarWidget.on('closed', function() {
+                var map = cm.get('map')
+                if (isPhoneBrowser() && map) {
+                    map.getContainer().style.display = 'block';
+                }
+            });
+            return sidebarWidget;
         } else {
             return null;
         }
