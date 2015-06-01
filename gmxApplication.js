@@ -412,18 +412,21 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     cm.define('sidebarWidget', ['config', 'layoutManager'], function(cm) {
         var config = cm.get('config');
         var layoutManager = cm.get('layoutManager');
+        var widgetsContainer = layoutManager.getWidgetsContainer();
         if (config.sidebarWidget && L.Control.Sidebar) {
-            var sidebarWidget = new L.Control.Sidebar(layoutManager.getWidgetsContainer());
-            sidebarWidget.on('opened', function() {
+            var sidebarWidget = new L.Control.Sidebar(widgetsContainer);
+            sidebarWidget.on('opening', function() {
                 var map = cm.get('map')
                 if (isPhoneBrowser() && map) {
-                    map.getContainer().style.display = 'none';
+                    L.DomUtil.addClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
+                    L.DomUtil.addClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
             });
-            sidebarWidget.on('closed', function() {
+            sidebarWidget.on('closing', function() {
                 var map = cm.get('map')
                 if (isPhoneBrowser() && map) {
-                    map.getContainer().style.display = 'block';
+                    L.DomUtil.removeClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
+                    L.DomUtil.removeClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
             });
             return sidebarWidget;
