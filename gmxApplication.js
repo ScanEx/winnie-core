@@ -23,7 +23,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return a;
     }
 
-    function isMobileBrowser() {
+    var isMobile = (nsGmx && nsGmx.Utils && nsGmx.Utils.isMobile) || function() {
         if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
             return true;
         } else {
@@ -31,18 +31,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     }
 
-    function isPhoneBrowser() {
-        return isMobileBrowser() && (screen.width <= 768);
+    var isPhone = (nsGmx && nsGmx.Utils && nsGmx.Utils.isPhone) || function() {
+        return isMobile() && (screen.width <= 768);
     }
-
-    cm.define('utils', [], function() {
-        return {
-            extend: extend,
-            clone: clone,
-            isMobileBrowser: isMobileBrowser,
-            isPhoneBrowser: isPhoneBrowser
-        }
-    });
 
     // returns config object
     cm.define('config', [], function(cm, cb) {
@@ -417,14 +408,14 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             var sidebarWidget = new L.Control.Sidebar(widgetsContainer);
             sidebarWidget.on('opening', function() {
                 var map = cm.get('map')
-                if (isPhoneBrowser() && map) {
+                if (isPhone() && map) {
                     L.DomUtil.addClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.addClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
             });
             sidebarWidget.on('closing', function() {
                 var map = cm.get('map')
-                if (isPhoneBrowser() && map) {
+                if (isPhone() && map) {
                     L.DomUtil.removeClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.removeClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
