@@ -404,8 +404,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var layoutManager = cm.get('layoutManager');
         var widgetsContainer = layoutManager.getWidgetsContainer();
-        if (config.sidebarWidget && L.Control.Sidebar) {
-            var sidebarWidget = new L.Control.Sidebar(widgetsContainer);
+        if (config.sidebarWidget && L.Control.IconSidebarWidget) {
+            var sidebarWidget = new L.Control.IconSidebarWidget(widgetsContainer);
             sidebarWidget.on('opening', function() {
                 var map = cm.get('map')
                 if (isPhone() && map) {
