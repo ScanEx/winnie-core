@@ -9,4 +9,5 @@
 .gmxApplication-widgetsContainer { z-index: 1020; pointer-events: none; }
 .gmxApplication-widgetsContainer .ui-widget, .gmxApplication-widgetsContainer .iconSidebarWidget { pointer-events: auto; }
 
-.gmxApplication-widgetsContainer .iconSidebarWidget.iconSidebarWidget-tabs-expanded { bottom: 0px; }
+.gmxApplication-widgetsContainer .iconSidebarWidget { top: 0px; }
+.gmxApplication-widgetsContainer .iconSidebarWidget.iconSidebarWidget-afterAnimation-bottom { bottom: 0px; }
