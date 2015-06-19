@@ -404,7 +404,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var layoutManager = cm.get('layoutManager');
         var widgetsContainer = layoutManager.getWidgetsContainer();
-        if (config.sidebarWidget && L.Control.IconSidebarWidget) {
+        if (config.sidebarWidget && nsGmx.IconSidebarWidget) {
             var sidebarWidget = new nsGmx.IconSidebarWidget(config.sidebarWidget);
             sidebarWidget.appendTo(widgetsContainer);
             sidebarWidget.on('opening', function() {
