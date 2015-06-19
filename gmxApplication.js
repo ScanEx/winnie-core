@@ -170,7 +170,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var baseLayersManager = cm.get('baseLayersManager');
         if (config.baseLayersControl) {
-            var ctrl = new nsGmx.BaseLayersControl(baseLayersManager, extend(config.baseLayersControl, {
+            var ctrl = new L.Control.GmxIconLayers(baseLayersManager, extend(config.baseLayersControl, {
                 language: config.language
             }));
             map.addControl(ctrl);
