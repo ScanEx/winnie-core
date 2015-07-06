@@ -103,6 +103,14 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
+    cm.define('permalinkManager', [], function() {
+        if (nsGmx.PermalinkManager) {
+            return new nsGmx.PermalinkManager();
+        } else {
+            return null;
+        }
+    });
+
     cm.define('layoutManager', ['config'], function() {
         var rootContainer = container.length ? container[0] : container;
         L.DomUtil.addClass(rootContainer, 'gmxApplication-rootContainer');
@@ -131,6 +139,29 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             opts.attributionControl = true;
         }
         return L.map(cm.get('layoutManager').getMapContainer(), opts);
+    });
+
+    cm.define('mapSerializer', ['map', 'permalinkManager'], function() {
+        var map = cm.get('map');
+        var permalinkManager = cm.get('permalinkManager');
+        var serializer = {};
+        serializer.saveState = function() {
+            return {
+                version: '1.0.0',
+                position: {
+                    x: map.getCenter().lng,
+                    y: map.getCenter().lat,
+                    z: map.getZoom()
+                }
+            };
+        };
+        serializer.loadState = function(data) {
+            map.setView([data.position.y, data.position.x], data.position.z);
+        };
+
+        permalinkManager && permalinkManager.setIdentity('map', serializer);
+
+        return serializer;
     });
 
     cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
@@ -307,12 +338,15 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('layersTree', ['gmxMap'], function(cm) {
+    cm.define('layersTree', ['gmxMap', 'permalinkManager'], function(cm) {
+        var permalinkManager = cm.get('permalinkManager');
         if (nsGmx && nsGmx.LayersTreeNode) {
             var rawTree = cm.get('gmxMap').getRawTree();
-            return new nsGmx.LayersTreeNode({
+            var layersTree = new nsGmx.LayersTreeNode({
                 content: rawTree
             });
+            permalinkManager && permalinkManager.setIdentity('layersTree', layersTree);
+            return layersTree;
         } else {
             return false;
         }
@@ -438,6 +472,34 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             }));
             layersTreeWidget.appendTo(container);
             return layersTreeWidget;
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('bookmarksWidget', ['map', 'gmxMap', 'sidebarWidget', 'permalinkManager'], function() {
+        var config = cm.get('config');
+        var sidebar = cm.get('sidebarWidget');
+        var rawTree = cm.get('gmxMap').getRawTree();
+        var permalinkManager = cm.get('permalinkManager');
+
+        if (!permalinkManager) {
+            return;
+        }
+
+        if (config.bookmarksWidget && nsGmx.BookmarksWidget && rawTree && sidebar) {
+            var container = sidebar.addTab('sidebarTab-bookmarksWidget', 'icon-bookmark');
+            var bookmarksWidget = new nsGmx.BookmarksWidget({
+                collection: new Backbone.Collection(JSON.parse(rawTree.properties.UserData).tabs)
+            });
+
+            bookmarksWidget.on('selected', function(model) {
+                permalinkManager.loadFromData(model.get('state'));
+            });
+
+            bookmarksWidget.appendTo(container);
+
+            return bookmarksWidget;
         } else {
             return null;
         }
