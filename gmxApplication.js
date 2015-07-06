@@ -433,9 +433,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var layersTree = cm.get('layersTree');
         if (config.layersTreeWidget && nsGmx.LayersTreeWidget && layersTree && sidebar) {
             var container = sidebar.addTab('sidebarTab-layersTree', 'icon-layers');
-            var layersTreeWidget = new nsGmx.LayersTreeWidget({
+            var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend(config.layersTreeWidget, {
                 layersTree: layersTree
-            });
+            }));
             layersTreeWidget.appendTo(container);
             return layersTreeWidget;
         } else {
