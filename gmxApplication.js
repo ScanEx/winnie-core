@@ -467,10 +467,33 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var layersTree = cm.get('layersTree');
         if (config.layersTreeWidget && nsGmx.LayersTreeWidget && layersTree && sidebar) {
             var container = sidebar.addTab('sidebarTab-layersTree', 'icon-layers');
+
             var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend(config.layersTreeWidget, {
                 layersTree: layersTree
             }));
-            layersTreeWidget.appendTo(container);
+
+            if (nsGmx.ScrollView) {
+                var scrollView = new nsGmx.ScrollView({
+                    views: [layersTreeWidget]
+                });
+
+                $(window).on('resize', function() {
+                    scrollView.repaint();
+                });
+
+                function repaint(le) {
+                    if (le.id === 'sidebarTab-layersTree') {
+                        scrollView.repaint();
+                    }
+                }
+                sidebar.on('content', repaint);
+                sidebar.on('opened', repaint);
+
+                scrollView.appendTo(container);
+            } else {
+                layersTreeWidget.appendTo(container);
+            }
+
             return layersTreeWidget;
         } else {
             return null;
@@ -497,7 +520,27 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 permalinkManager.loadFromData(model.get('state'));
             });
 
-            bookmarksWidget.appendTo(container);
+            if (nsGmx.ScrollView) {
+                var scrollView = new nsGmx.ScrollView({
+                    views: [bookmarksWidget]
+                });
+
+                $(window).on('resize', function() {
+                    scrollView.repaint();
+                });
+
+                function repaint(le) {
+                    if (le.id === 'sidebarTab-bookmarksWidget') {
+                        scrollView.repaint();
+                    }
+                }
+                sidebar.on('content', repaint);
+                sidebar.on('opened', repaint);
+
+                scrollView.appendTo(container);
+            } else {
+                bookmarksWidget.appendTo(container);
+            }
 
             return bookmarksWidget;
         } else {
