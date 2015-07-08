@@ -178,10 +178,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         });
     });
 
-    cm.define('baseLayersManager', ['map', 'gmxMap', 'config'], function(cm, cb) {
+    cm.define('baseLayersManager', ['map', 'gmxMap', 'config', 'permalinkManager'], function(cm, cb) {
         var map = cm.get('map');
         var gmxMap = cm.get('gmxMap');
         var config = cm.get('config');
+        var permalinkManager = cm.get('permalinkManager');
 
         var baseLayers = gmxMap.getRawTree().properties.BaseLayers.trim().slice(1, -1).split(',').map(function(e) {
             return e.trim().slice(1, -1)
@@ -192,6 +193,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
         map.gmxBaseLayersManager.initDefaults().then(function() {
             map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
+            permalinkManager.setIdentity('baseLayersManager', map.gmxBaseLayersManager);
             cb(map.gmxBaseLayersManager);
         });
     });
