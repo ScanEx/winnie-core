@@ -111,34 +111,23 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('layoutManager', ['config'], function() {
-        var rootContainer = container.length ? container[0] : container;
-        L.DomUtil.addClass(rootContainer, 'gmxApplication-rootContainer');
-        var widgetsContainer = L.DomUtil.create('div', 'gmxApplication-widgetsContainer', rootContainer);
-        var mapContainer = L.DomUtil.create('div', 'gmxApplication-mapContainer', rootContainer);
-        return {
-            getRootContainer: function() {
-                return rootContainer;
-            },
-            getMapContainer: function() {
-                return mapContainer;
-            },
-            getWidgetsContainer: function() {
-                return widgetsContainer;
-            }
-        }
-    });
-
-    cm.define('map', ['config', 'layoutManager'], function(cm, cb) {
+    cm.define('map', ['config'], function(cm, cb) {
         var config = cm.get('config')
         var opts = clone(config.map);
+        
         if (config.zoomControl === 'leaflet') {
             opts.zoomControl = true;
         }
+        
         if (config.copyrightControl === 'leaflet') {
             opts.attributionControl = true;
         }
-        return L.map(cm.get('layoutManager').getMapContainer(), opts);
+
+        L.Map.addInitHook(function() {
+            this._controlCorners['centerbs'] = L.DomUtil.create('div', 'leaflet-top leaflet-bottom leaflet-left leaflet-right gmx-bottom-shift', this._controlContainer);
+        });
+
+        return L.map(container[0] || container, opts);
     });
 
     cm.define('mapSerializer', ['map', 'permalinkManager'], function() {
@@ -162,6 +151,24 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         permalinkManager && permalinkManager.setIdentity('map', serializer);
 
         return serializer;
+    });
+
+    cm.define('widgetsContainer', ['map'], function(cm) {
+        var map = cm.get('map');
+
+        var WidgetsContainer = L.Control.extend({
+            options: {
+                position: 'centerbs'
+            },
+            onAdd: function() {
+                this._container = L.DomUtil.create('div', 'gmxApplication-widgetsContainer');
+                return this._container;
+            }
+        });
+
+        var widgetsContainer = new WidgetsContainer();
+        widgetsContainer.addTo(map);
+        return widgetsContainer.getContainer();
     });
 
     cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
@@ -436,10 +443,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
-    cm.define('sidebarWidget', ['config', 'layoutManager'], function(cm) {
+    cm.define('sidebarWidget', ['config', 'widgetsContainer'], function(cm) {
         var config = cm.get('config');
-        var layoutManager = cm.get('layoutManager');
-        var widgetsContainer = layoutManager.getWidgetsContainer();
+        var widgetsContainer = cm.get('widgetsContainer');
         if (config.sidebarWidget && nsGmx.IconSidebarWidget) {
             var sidebarWidget = new nsGmx.IconSidebarWidget(config.sidebarWidget);
             sidebarWidget.appendTo(widgetsContainer);
@@ -550,9 +556,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('storytellingWidget', ['map', 'config', 'gmxMap', 'calendar'], function(cm) {
+    cm.define('storytellingWidget', ['map', 'config', 'gmxMap', 'calendar', 'widgetsContainer'], function(cm) {
         var config = cm.get('config');
-        var layoutManager = cm.get('layoutManager');
+        var widgetsContainer = cm.get('widgetsContainer');
         var gmxMap = cm.get('gmxMap');
         var map = cm.get('map');
         var calendar = cm.get('calendar');
@@ -561,7 +567,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 bookmarks: JSON.parse(gmxMap.getRawTree().properties.UserData).tabs
             });
 
-            storytellingWidget.appendTo(layoutManager.getWidgetsContainer());
+            storytellingWidget.appendTo(widgetsContainer.getWidgetsContainer());
 
             storytellingWidget.on('storyChanged', function(story) {
                 map.panTo(L.Projection.Mercator.unproject(new L.Point(
