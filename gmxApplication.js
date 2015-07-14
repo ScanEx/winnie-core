@@ -123,11 +123,26 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             opts.attributionControl = true;
         }
 
-        L.Map.addInitHook(function() {
-            this._controlCorners['centerbs'] = L.DomUtil.create('div', 'leaflet-top leaflet-bottom leaflet-left leaflet-right gmx-bottom-shift', this._controlContainer);
-        });
-
         return L.map(container[0] || container, opts);
+    });
+
+    cm.define('centerbsControlCorner', ['map'], function(cm) {
+        var map = cm.get('map');
+        var el = L.DomUtil.create('div', 'leaflet-top leaflet-bottom leaflet-left leaflet-right gmx-bottom-shift gmxApplication-centerbsControlCorner', map._controlContainer);
+        map._controlCorners['centerbs'] = el;
+        return {
+            fadeIn: function() {
+                L.DomUtil.removeClass(el, 'gmx-bottom-shift');
+                L.DomUtil.addClass(el, 'gmxApplication-centerbsControlCorner-fadeIn');
+            },
+            fadeOut: function() {
+                L.DomUtil.addClass(el, 'gmx-bottom-shift');
+                L.DomUtil.removeClass(el, 'gmxApplication-centerbsControlCorner-fadeIn');
+            },
+            getContainer: function() {
+                return el;
+            }
+        }
     });
 
     cm.define('mapSerializer', ['map', 'permalinkManager'], function() {
@@ -153,7 +168,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return serializer;
     });
 
-    cm.define('widgetsContainer', ['map'], function(cm) {
+    cm.define('widgetsContainerControl', ['map', 'centerbsControlCorner'], function(cm) {
         var map = cm.get('map');
 
         var WidgetsContainer = L.Control.extend({
@@ -168,7 +183,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
         var widgetsContainer = new WidgetsContainer();
         widgetsContainer.addTo(map);
-        return widgetsContainer.getContainer();
+        return widgetsContainer;
+    });
+
+    cm.define('widgetsContainer', ['widgetsContainerControl'], function(cm) {
+        return cm.get('widgetsContainerControl').getContainer();
     });
 
     cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
@@ -443,9 +462,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
-    cm.define('sidebarWidget', ['config', 'widgetsContainer'], function(cm) {
+    cm.define('sidebarWidget', ['config', 'widgetsContainer', 'centerbsControlCorner'], function(cm) {
         var config = cm.get('config');
         var widgetsContainer = cm.get('widgetsContainer');
+        var centerbsControlCorner = cm.get('centerbsControlCorner');
         if (config.sidebarWidget && nsGmx.IconSidebarWidget) {
             var sidebarWidget = new nsGmx.IconSidebarWidget(config.sidebarWidget);
             sidebarWidget.appendTo(widgetsContainer);
@@ -475,9 +495,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     cm.get('copyrightControl')
                 ].map(function(ctrl) {
                     if (e.isStuck) {
+                        L.DomUtil.addClass(sidebarWidget.getContainer(), 'gmxApplication-noShadow');
                         ctrl && L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
+                        centerbsControlCorner.fadeIn();
                     } else {
+                        L.DomUtil.removeClass(sidebarWidget.getContainer(), 'gmxApplication-noShadow');
                         ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
+                        centerbsControlCorner.fadeOut();
                     }
                 });
             });
@@ -514,6 +538,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 }
                 sidebar.on('content', repaint);
                 sidebar.on('opened', repaint);
+                sidebar.on('stick', repaint);
 
                 scrollView.appendTo(container);
             } else {
@@ -562,6 +587,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 }
                 sidebar.on('content', repaint);
                 sidebar.on('opened', repaint);
+                sidebar.on('stick', repaint);
 
                 scrollView.appendTo(container);
             } else {
