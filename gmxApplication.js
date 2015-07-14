@@ -219,7 +219,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
         map.gmxBaseLayersManager.initDefaults().then(function() {
             map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
-            permalinkManager.setIdentity('baseLayersManager', map.gmxBaseLayersManager);
+            permalinkManager && permalinkManager.setIdentity('baseLayersManager', map.gmxBaseLayersManager);
             cb(map.gmxBaseLayersManager);
         });
     });
@@ -228,7 +228,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var map = cm.get('map');
         var config = cm.get('config');
         var baseLayersManager = cm.get('baseLayersManager');
-        if (config.baseLayersControl) {
+        if (config.baseLayersControl && L.Control.GmxIconLayers) {
             var ctrl = new L.Control.GmxIconLayers(baseLayersManager, extend(config.baseLayersControl, {
                 language: config.language
             }));
@@ -558,7 +558,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var permalinkManager = cm.get('permalinkManager');
 
         if (!permalinkManager) {
-            return;
+            return null;
         }
 
         if (config.bookmarksWidget && nsGmx.BookmarksWidget && rawTree && sidebar) {
