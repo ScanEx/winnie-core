@@ -114,11 +114,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     cm.define('map', ['config'], function(cm, cb) {
         var config = cm.get('config')
         var opts = clone(config.map);
-        
+
         if (config.zoomControl === 'leaflet') {
             opts.zoomControl = true;
         }
-        
+
         if (config.copyrightControl === 'leaflet') {
             opts.attributionControl = true;
         }
@@ -462,6 +462,24 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     L.DomUtil.removeClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.removeClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
+            });
+            sidebarWidget.on('stick', function(e) {
+                [
+                    cm.get('baseLayersControl'),
+                    cm.get('logoControl'),
+                    cm.get('hideControl'),
+                    cm.get('zoomControl'),
+                    cm.get('centerControl'),
+                    cm.get('bottomControl'),
+                    cm.get('locationControl'),
+                    cm.get('copyrightControl')
+                ].map(function(ctrl) {
+                    if (e.isStuck) {
+                        ctrl && L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
+                    } else {
+                        ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
+                    }
+                });
             });
             return sidebarWidget;
         } else {
