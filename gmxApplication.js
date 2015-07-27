@@ -99,6 +99,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('i18n', ['config'], function(cm) {
         var config = cm.get('config');
+        if (!L.gmxLocale || !L.gmxLocale.setLanguage) {
+            return false;
+        }
         L.gmxLocale.setLanguage(config.language);
         return null;
     });
@@ -192,6 +195,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
         var config = cm.get('config');
+        if (!L.gmx || !L.gmx.loadMap) {
+            return false;
+        }
         L.gmx.loadMap(config.gmxMap.mapID, config.gmxMap).then(function(layers) {
             cb({
                 getRawTree: function() {
