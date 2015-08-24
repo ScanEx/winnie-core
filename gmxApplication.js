@@ -109,6 +109,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     cm.define('permalinkManager', [], function() {
         if (nsGmx.PermalinkManager) {
             return new nsGmx.PermalinkManager();
+        } else if (nsGmx.StateManager) {
+            return new nsGmx.StateManager();
         } else {
             return null;
         }
@@ -332,7 +334,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('calendar', [], function(cm) {
+    cm.define('calendar', ['permalinkManager'], function(cm) {
+        var permalinkManager = cm.get('permalinkManager');
         if (Backbone) {
             var cal = new(Backbone.Model.extend({
                 initialize: function() {
@@ -358,13 +361,25 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 },
                 getDateEnd: function() {
                     return this.get('dateEnd');
+                },
+                loadState: function(state) {
+                    this.setDateBegin(state.dateBegin);
+                    this.setDateEnd(state.dateEnd);
+                },
+                saveState: function() {
+                    return {
+                        dateBegin: this.getDateBegin(),
+                        dateEnd: this.getDateEnd()
+                    }
                 }
             }))();
 
-            var now = new Date()
+            var now = new Date();
 
             cal.setDateBegin(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
             cal.setDateEnd(new Date());
+
+            permalinkManager && permalinkManager.setIdentity('calendar', cal);
 
             return cal;
         } else {
@@ -633,6 +648,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         } else {
             return null;
         }
+    });
+
+    cm.define('stateLoader', ['config', 'permalinkManager', 'mapSerializer', 'layersTree', 'baseLayersManager', 'calendar'], function(cm) {
+        var config = cm.get('config');
+        var permalinkManager = cm.get('permalinkManager');
+        config.state && permalinkManager && permalinkManager.loadFromData(config.state);
+        return null;
     });
 
     return cm;
