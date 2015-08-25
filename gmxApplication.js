@@ -67,6 +67,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     baseLayersControl: {},
                     layersMapper: {},
                     layersTreeWidget: false,
+                    bookmarksWidget: false,
                     storytellingWidget: false,
                     sidebarWidget: false
                 },
