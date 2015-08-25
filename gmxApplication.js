@@ -37,35 +37,50 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     // returns config object
     cm.define('config', [], function(cm, cb) {
-        var setDefaults = function(config) {
-            config.map = config.map || {};
-            config.map.zoom = config.map.zoom || 3;
-            config.map.center = config.map.center || [53, 82];
-            config.map.zoomControl = config.map.zoomControl || false;
-            config.map.attributionControl = config.map.attributionControl || false;
-
-            config.gmxMap = config.gmxMap || {};
-            config.gmxMap.setZIndex = (typeof config.gmxMap.setZIndex === 'boolean') ? config.gmxMap.setZIndex : true;
-
-            config.hideControl = (config.hideControl || (typeof config.hideControl === 'boolean')) ? config.hideControl : {};
-            config.zoomControl = (config.zoomControl || (typeof config.zoomControl === 'boolean')) ? config.zoomControl : {};
-            config.centerControl = (config.centerControl || (typeof config.centerControl === 'boolean')) ? config.centerControl : {
-                color: 'black'
-            };
-            config.bottomControl = (config.bottomControl || (typeof config.bottomControl === 'boolean')) ? config.bottomControl : {};
-            config.locationControl = (config.locationControl || (typeof config.locationControl === 'boolean')) ? config.locationControl : {};
-            config.copyrightControl = (config.copyrightControl || (typeof config.copyrightControl === 'boolean')) ? config.copyrightControl : {};
-
-            config.baseLayersControl = (config.baseLayersControl || (typeof config.baseLayersControl === 'boolean')) ? config.baseLayersControl : {};
-
-            config.language = (config.language === 'eng') ? 'eng' : 'rus';
-
-            config.layersMapper = (config.layersMapper || typeof config.layersMapper === 'boolean') ? config.layersMapper : true;
-
-            config.storytellingWidget = config.storytellingWidget || false;
-            config.sidebarWidget = config.sidebarWidget || !!config.layersTreeWidget || false;
-
+        var configConditions = function(config) {
+            if (config.app.layersTreeWidget || config.app.bookmarksWidget) {
+                config.app.sidebarWidget = {};
+            }
             return config;
+        };
+
+        var setDefaults = function(config) {
+            return configConditions($.extend(true, {
+                app: {
+                    map: {
+                        center: [53, 82],
+                        zoom: 3,
+                        zoomControl: false,
+                        attributionControl: false
+                    },
+                    gmxMap: {
+                        setZIndex: true
+                    },
+                    hideControl: {},
+                    zoomControl: {},
+                    centerControl: {
+                        color: 'black'
+                    },
+                    bottomControl: {},
+                    locationControl: {},
+                    copyrightControl: {},
+                    baseLayersControl: {},
+                    layersMapper: {},
+                    layersTreeWidget: false,
+                    storytellingWidget: false,
+                    sidebarWidget: false
+                },
+                state: {
+                    map: {
+                        position: {
+                            x: 82,
+                            y: 53,
+                            z: 3
+                        }
+                    },
+                    language: 'rus'
+                }
+            }, config));
         };
 
         if (typeof applicationConfig === 'object') {
@@ -102,7 +117,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (!L.gmxLocale || !L.gmxLocale.setLanguage) {
             return false;
         }
-        L.gmxLocale.setLanguage(config.language);
+        L.gmxLocale.setLanguage(config.state.language);
+        nsGmx.Translations && nsGmx.Translations.setLanguage(config.state.language);
         return null;
     });
 
@@ -118,13 +134,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('map', ['config'], function(cm, cb) {
         var config = cm.get('config')
-        var opts = clone(config.map);
+        var opts = clone(config.app.map);
 
-        if (config.zoomControl === 'leaflet') {
+        if (config.app.zoomControl === 'leaflet') {
             opts.zoomControl = true;
         }
 
-        if (config.copyrightControl === 'leaflet') {
+        if (config.app.copyrightControl === 'leaflet') {
             opts.attributionControl = true;
         }
 
@@ -200,7 +216,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (!L.gmx || !L.gmx.loadMap) {
             return false;
         }
-        L.gmx.loadMap(config.gmxMap.mapID, config.gmxMap).then(function(layers) {
+        L.gmx.loadMap(config.app.gmxMap.mapID, config.app.gmxMap).then(function(layers) {
             cb({
                 getRawTree: function() {
                     return layers.rawTree;
@@ -236,9 +252,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var map = cm.get('map');
         var config = cm.get('config');
         var baseLayersManager = cm.get('baseLayersManager');
-        if (config.baseLayersControl && L.Control.GmxIconLayers) {
-            var ctrl = new L.Control.GmxIconLayers(baseLayersManager, extend(config.baseLayersControl, {
-                language: config.language
+        if (config.app.baseLayersControl && L.Control.GmxIconLayers) {
+            var ctrl = new L.Control.GmxIconLayers(baseLayersManager, extend(config.app.baseLayersControl, {
+                language: nsGmx.Translations.getLanguage()
             }));
             map.addControl(ctrl);
             return ctrl;
@@ -248,7 +264,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     });
 
     cm.define('logoControl', ['map', 'config', 'i18n'], function(cm) {
-        var opts = cm.get('config').copyrightControl;
+        var opts = cm.get('config').app.copyrightControl;
         var ctrl = L.control.gmxLogo(
             (typeof opts === 'object') ? opts : {}
         );
@@ -257,7 +273,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     });
 
     cm.define('hideControl', ['map', 'config', 'i18n'], function(cm) {
-        var opts = cm.get('config').hideControl;
+        var opts = cm.get('config').app.hideControl;
         if (opts) {
             var ctrl = L.control.gmxHide(
                 (typeof opts === 'object') ? opts : {}
@@ -270,7 +286,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     });
 
     cm.define('zoomControl', ['map', 'config', 'i18n'], function(cm) {
-        var opts = cm.get('config').zoomControl;
+        var opts = cm.get('config').app.zoomControl;
         if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxZoom(
                 (typeof opts === 'object') ? opts : {}
@@ -283,7 +299,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     });
 
     cm.define('centerControl', ['map', 'config', 'i18n'], function(cm) {
-        var opts = cm.get('config').centerControl;
+        var opts = cm.get('config').app.centerControl;
         if (opts) {
             var ctrl = L.control.gmxCenter(
                 (typeof opts === 'object') ? opts : {}
@@ -296,7 +312,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     });
 
     cm.define('bottomControl', ['map', 'config', 'i18n'], function(cm) {
-        var opts = cm.get('config').bottomControl;
+        var opts = cm.get('config').app.bottomControl;
         if (opts) {
             var ctrl = L.control.gmxBottom(
                 (typeof opts === 'object') ? opts : {}
@@ -309,7 +325,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     });
 
     cm.define('locationControl', ['map', 'config', 'i18n'], function(cm) {
-        var opts = cm.get('config').locationControl;
+        var opts = cm.get('config').app.locationControl;
         if (opts) {
             var ctrl = L.control.gmxLocation(
                 (typeof opts === 'object') ? opts : {}
@@ -322,7 +338,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     });
 
     cm.define('copyrightControl', ['map', 'config', 'i18n'], function(cm) {
-        var opts = cm.get('config').copyrightControl;
+        var opts = cm.get('config').app.copyrightControl;
         if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxCopyright(
                 (typeof opts === 'object') ? opts : {}
@@ -411,7 +427,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var layersTree = cm.get('layersTree');
         var config = cm.get('config');
 
-        if (config.layersMapper) {
+        if (config.app.layersMapper) {
             if (!map || !layersHash || !layersTree) {
                 return false;
             }
@@ -487,8 +503,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var widgetsContainer = cm.get('widgetsContainer');
         var centerbsControlCorner = cm.get('centerbsControlCorner');
-        if (config.sidebarWidget && nsGmx.IconSidebarWidget) {
-            var sidebarWidget = new nsGmx.IconSidebarWidget(config.sidebarWidget);
+        if (config.app.sidebarWidget && nsGmx.IconSidebarWidget) {
+            var sidebarWidget = new nsGmx.IconSidebarWidget(config.app.sidebarWidget);
             sidebarWidget.appendTo(widgetsContainer);
             sidebarWidget.on('opening', function() {
                 var map = cm.get('map')
@@ -536,10 +552,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var sidebar = cm.get('sidebarWidget');
         var layersTree = cm.get('layersTree');
-        if (config.layersTreeWidget && nsGmx.LayersTreeWidget && layersTree && sidebar) {
+        if (config.app.layersTreeWidget && nsGmx.LayersTreeWidget && layersTree && sidebar) {
             var container = sidebar.addTab('sidebarTab-layersTree', 'icon-layers');
 
-            var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend(config.layersTreeWidget, {
+            var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend(config.app.layersTreeWidget, {
                 layersTree: layersTree
             }));
 
@@ -582,7 +598,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return null;
         }
 
-        if (config.bookmarksWidget && nsGmx.BookmarksWidget && rawTree && sidebar) {
+        if (config.app.bookmarksWidget && nsGmx.BookmarksWidget && rawTree && sidebar) {
             var container = sidebar.addTab('sidebarTab-bookmarksWidget', 'icon-bookmark');
             var bookmarksWidget = new nsGmx.BookmarksWidget({
                 collection: new Backbone.Collection(JSON.parse(rawTree.properties.UserData).tabs)
@@ -627,12 +643,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var gmxMap = cm.get('gmxMap');
         var map = cm.get('map');
         var calendar = cm.get('calendar');
-        if (config.storytellingWidget) {
+        if (config.app.storytellingWidget) {
             var storytellingWidget = new nsGmx.StorytellingWidget({
                 bookmarks: JSON.parse(gmxMap.getRawTree().properties.UserData).tabs
             });
 
-            storytellingWidget.appendTo(widgetsContainer.getWidgetsContainer());
+            storytellingWidget.appendTo(widgetsContainer);
 
             storytellingWidget.on('storyChanged', function(story) {
                 map.panTo(L.Projection.Mercator.unproject(new L.Point(
@@ -653,7 +669,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     cm.define('stateLoader', ['config', 'permalinkManager', 'mapSerializer', 'layersTree', 'baseLayersManager', 'calendar'], function(cm) {
         var config = cm.get('config');
         var permalinkManager = cm.get('permalinkManager');
-        config.state && permalinkManager && permalinkManager.loadFromData(config.state);
+        config.state && permalinkManager && permalinkManager.loadFromData({
+            version: '3.0.0',
+            components: config.state
+        });
         return null;
     });
 
