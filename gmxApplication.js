@@ -226,7 +226,30 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     return layers.layersByID;
                 }
             });
+        }, function (err) {
+            cb({
+                getRawTree: function () {
+                    return {
+                        properties: {
+                            BaseLayers: '[]'
+                        },
+                        children: []
+                    }
+                },
+                getLayersHash: function () {
+                    return {};
+                },
+                error: err
+            })
         });
+    });
+
+    cm.define('gmxMapErrorHandler', ['gmxMap'], function (cm) {
+        var gmxMap = cm.get('gmxMap');
+        if (gmxMap.error) {
+            console.error(gmxMap.error);
+        }
+        return null;
     });
 
     cm.define('baseLayersManager', ['map', 'gmxMap', 'config', 'permalinkManager'], function(cm, cb) {
@@ -420,7 +443,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     // компонент, управляющий отображением слоёв на карте
     // В нормальном порядке просто отображает видимые слои из layersTree,
-    // однако позволяет запретить отображать какой-либо слой, тем самым 
+    // однако позволяет запретить отображать какой-либо слой, тем самым
     // передавая управляение его видимостью
     cm.define('layersMapper', ['config', 'map', 'gmxMap', 'layersTree'], function(cm) {
         var map = cm.get('map');
