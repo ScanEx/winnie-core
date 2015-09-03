@@ -579,7 +579,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (config.app.layersTreeWidget && nsGmx.LayersTreeWidget && layersTree && sidebar) {
             var container = sidebar.addTab('sidebarTab-layersTree', 'icon-layers');
 
-            var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend(config.app.layersTreeWidget, {
+            var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend({
+                isMobile: isMobile()
+            }, config.app.layersTreeWidget, {
                 layersTree: layersTree
             }));
 
