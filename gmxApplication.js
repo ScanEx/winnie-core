@@ -64,6 +64,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     bottomControl: {},
                     locationControl: {},
                     copyrightControl: {},
+                    loaderStatusControl: {
+                        type: 'font'
+                    },
                     baseLayersControl: {},
                     layersMapper: {},
                     layersTreeWidget: false,
@@ -365,6 +368,19 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var opts = cm.get('config').app.copyrightControl;
         if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxCopyright(
+                (typeof opts === 'object') ? opts : {}
+            );
+            cm.get('map').addControl(ctrl);
+            return ctrl;
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('loaderStatusControl', ['map', 'config', 'i18n'], function (cm) {
+        var opts = cm.get('config').app.loaderStatusControl;
+        if (opts) {
+            var ctrl = L.control.gmxLoaderStatus(
                 (typeof opts === 'object') ? opts : {}
             );
             cm.get('map').addControl(ctrl);
