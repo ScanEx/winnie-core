@@ -81,8 +81,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                             y: 53,
                             z: 3
                         }
-                    },
-                    language: 'rus'
+                    }
                 }
             }, config));
         };
@@ -121,8 +120,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (!L.gmxLocale || !L.gmxLocale.setLanguage) {
             return false;
         }
-        L.gmxLocale.setLanguage(config.state.language);
-        nsGmx.Translations && nsGmx.Translations.setLanguage(config.state.language);
+        var lang = config.state.language || (nsGmx.Translations && nsGmx.Translations.getLanguage());
+        if (lang) {
+            L.gmxLocale.setLanguage(lang);
+            nsGmx.Translations && nsGmx.Translations.setLanguage(lang);
+        }
         return null;
     });
 
@@ -229,9 +231,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     return layers.layersByID;
                 }
             });
-        }, function (err) {
+        }, function(err) {
             cb({
-                getRawTree: function () {
+                getRawTree: function() {
                     return {
                         properties: {
                             BaseLayers: '[]'
@@ -239,7 +241,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                         children: []
                     }
                 },
-                getLayersHash: function () {
+                getLayersHash: function() {
                     return {};
                 },
                 error: err
@@ -247,7 +249,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         });
     });
 
-    cm.define('gmxMapErrorHandler', ['gmxMap'], function (cm) {
+    cm.define('gmxMapErrorHandler', ['gmxMap'], function(cm) {
         var gmxMap = cm.get('gmxMap');
         if (gmxMap.error) {
             console.error(gmxMap.error);
@@ -377,7 +379,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('loaderStatusControl', ['map', 'config', 'i18n'], function (cm) {
+    cm.define('loaderStatusControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.loaderStatusControl;
         if (opts) {
             var ctrl = L.control.gmxLoaderStatus(
