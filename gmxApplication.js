@@ -541,7 +541,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
-    cm.define('sidebarWidget', ['config', 'widgetsContainer', 'centerbsControlCorner'], function(cm) {
+    cm.define('sidebarWidget', ['config', 'widgetsContainer', 'centerbsControlCorner', 'map'], function(cm) {
+        var map = cm.get('map')
         var config = cm.get('config');
         var widgetsContainer = cm.get('widgetsContainer');
         var centerbsControlCorner = cm.get('centerbsControlCorner');
@@ -549,14 +550,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             var sidebarWidget = new nsGmx.IconSidebarWidget(config.app.sidebarWidget);
             sidebarWidget.appendTo(widgetsContainer);
             sidebarWidget.on('opening', function() {
-                var map = cm.get('map')
                 if (isPhone() && map) {
                     L.DomUtil.addClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.addClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
             });
             sidebarWidget.on('closing', function() {
-                var map = cm.get('map')
                 if (isPhone() && map) {
                     L.DomUtil.removeClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.removeClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
@@ -571,7 +570,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     cm.get('centerControl'),
                     cm.get('bottomControl'),
                     cm.get('locationControl'),
-                    cm.get('copyrightControl')
+                    cm.get('copyrightControl'),
+                    cm.get('loaderStatusControl'),
+                    map.zoomControl,
+                    map.attributionControl
                 ].map(function(ctrl) {
                     if (e.isStuck) {
                         L.DomUtil.addClass(sidebarWidget.getContainer(), 'gmxApplication-noShadow');
