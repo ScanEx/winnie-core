@@ -538,6 +538,34 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
+    cm.define('layersTranslations', ['config', 'layersTree'], function(cm) {
+        var config = cm.get('config');
+        var layersTree = cm.get('layersTree');
+        var translatableProperties = ['title', 'description'];
+        if (!config.layers) {
+            return null;
+        }
+        for (var layerId in config.layers) {
+            var props = config.layers[layerId];
+            var layer = layersTree.find(layerId);
+            if (config.layers.hasOwnProperty(layerId) && layer) {
+                var layerProperties = layer.get('properties');
+                for (var i = 0; i < translatableProperties.length; i++) {
+                    var prop = translatableProperties[i];
+                    var lang = nsGmx.Translations.getLanguage();
+                    if (
+                        props[prop] &&
+                        props[prop][lang] &&
+                        layerProperties[prop]
+                    ) {
+                        layerProperties[prop] = props[prop][lang];
+                    }
+                }
+            }
+        }
+        return null;
+    });
+
     cm.define('dateMapper', ['layersHash', 'calendar'], function(cm) {
         var layersHash = cm.get('layersHash');
         var calendar = cm.get('calendar');
