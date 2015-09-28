@@ -523,6 +523,44 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
+    cm.define('layersClusters', ['config', 'gmxMap'], function(cm) {
+        var config = cm.get('config');
+        var layersHash = cm.get('gmxMap').getLayersHash();
+        if (!config.layers) {
+            return null;
+        }
+        for (var layerId in config.layers) {
+            var layer = layersHash[layerId]
+            if (
+                config.layers.hasOwnProperty(layerId) &&
+                config.layers[layerId].clusters &&
+                layer
+            ) {
+                var opts = L.extend({
+                    zoomToBoundsOnClick: false,
+                    autoSpiderfy: true,
+                    maxZoom: 30
+                }, config.layers[layerId].clusters);
+                if (opts.autoSpiderfy) {
+                    opts = L.extend(opts, {
+                        clusterclick: function(e) {
+                            var bounds = e.layer.getBounds();
+                            var nw = bounds.getNorthWest();
+                            var se = bounds.getSouthEast();
+                            if (nw.distanceTo(se) === 0) {
+                                e.layer.spiderfy();
+                            } else {
+                                e.layer.zoomToBounds();
+                            }
+                        }
+                    })
+                }
+                layer.bindClusters(opts);
+            }
+        }
+        return null;
+    });
+
     cm.define('dateMapper', ['gmxMap', 'calendar'], function(cm) {
         var layersHash = cm.get('gmxMap').getLayersHash();
         var calendar = cm.get('calendar');
