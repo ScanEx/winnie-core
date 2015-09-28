@@ -249,6 +249,14 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         });
     });
 
+    cm.define('rawTree', ['gmxMap'], function(cm) {
+        return cm.get('gmxMap').getRawTree();
+    });
+
+    cm.define('layersHash', ['gmxMap'], function(cm) {
+        return cm.get('gmxMap').getLayersHash();
+    });
+
     cm.define('gmxMapErrorHandler', ['gmxMap'], function(cm) {
         var gmxMap = cm.get('gmxMap');
         if (gmxMap.error) {
@@ -257,13 +265,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
-    cm.define('baseLayersManager', ['map', 'gmxMap', 'config', 'permalinkManager'], function(cm, cb) {
+    cm.define('baseLayersManager', ['map', 'config', 'rawTree', 'permalinkManager'], function(cm, cb) {
         var map = cm.get('map');
-        var gmxMap = cm.get('gmxMap');
         var config = cm.get('config');
+        var rawTree = cm.get('rawTree');
         var permalinkManager = cm.get('permalinkManager');
 
-        var baseLayers = gmxMap.getRawTree().properties.BaseLayers.trim().slice(1, -1).split(',').map(function(e) {
+        var baseLayers = rawTree.properties.BaseLayers.trim().slice(1, -1).split(',').map(function(e) {
             return e.trim().slice(1, -1)
         });
         if (!map.gmxBaseLayersManager) {
@@ -445,10 +453,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('layersTree', ['gmxMap', 'permalinkManager'], function(cm) {
+    cm.define('layersTree', ['rawTree', 'permalinkManager'], function(cm) {
+        var rawTree = cm.get('rawTree');
         var permalinkManager = cm.get('permalinkManager');
         if (nsGmx && nsGmx.LayersTreeNode) {
-            var rawTree = cm.get('gmxMap').getRawTree();
             var layersTree = new nsGmx.LayersTreeNode({
                 content: rawTree
             });
@@ -463,9 +471,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     // В нормальном порядке просто отображает видимые слои из layersTree,
     // однако позволяет запретить отображать какой-либо слой, тем самым
     // передавая управляение его видимостью
-    cm.define('layersMapper', ['config', 'map', 'gmxMap', 'layersTree'], function(cm) {
+    cm.define('layersMapper', ['config', 'map', 'layersHash', 'layersTree'], function(cm) {
         var map = cm.get('map');
-        var layersHash = cm.get('gmxMap').getLayersHash();
+        var layersHash = cm.get('layersHash');
         var layersTree = cm.get('layersTree');
         var config = cm.get('config');
 
@@ -523,9 +531,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('layersClusters', ['config', 'gmxMap'], function(cm) {
+    cm.define('layersClusters', ['config', 'layersHash'], function(cm) {
         var config = cm.get('config');
-        var layersHash = cm.get('gmxMap').getLayersHash();
+        var layersHash = cm.get('layersHash');
         if (!config.layers) {
             return null;
         }
@@ -561,8 +569,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
-    cm.define('dateMapper', ['gmxMap', 'calendar'], function(cm) {
-        var layersHash = cm.get('gmxMap').getLayersHash();
+    cm.define('dateMapper', ['layersHash', 'calendar'], function(cm) {
+        var layersHash = cm.get('layersHash');
         var calendar = cm.get('calendar');
 
         var mapDate = function(dateBegin, dateEnd) {
@@ -672,10 +680,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('bookmarksWidget', ['map', 'gmxMap', 'sidebarWidget', 'permalinkManager'], function() {
+    cm.define('bookmarksWidget', ['map', 'rawTree', 'sidebarWidget', 'permalinkManager'], function() {
         var config = cm.get('config');
         var sidebar = cm.get('sidebarWidget');
-        var rawTree = cm.get('gmxMap').getRawTree();
+        var rawTree = cm.get('rawTree');
         var permalinkManager = cm.get('permalinkManager');
 
         if (!permalinkManager) {
@@ -721,15 +729,15 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('storytellingWidget', ['map', 'config', 'gmxMap', 'calendar', 'widgetsContainer'], function(cm) {
+    cm.define('storytellingWidget', ['map', 'config', 'rawTree', 'calendar', 'widgetsContainer'], function(cm) {
         var config = cm.get('config');
         var widgetsContainer = cm.get('widgetsContainer');
-        var gmxMap = cm.get('gmxMap');
+        var rawTree = cm.get('rawTree');
         var map = cm.get('map');
         var calendar = cm.get('calendar');
         if (config.app.storytellingWidget) {
             var storytellingWidget = new nsGmx.StorytellingWidget({
-                bookmarks: JSON.parse(gmxMap.getRawTree().properties.UserData).tabs
+                bookmarks: JSON.parse(rawTree.properties.UserData).tabs
             });
 
             storytellingWidget.appendTo(widgetsContainer);
