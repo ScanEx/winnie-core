@@ -16,3 +16,13 @@
 .gmxApplication-centerbsControlCorner-fadeIn { background-color: hsla(0, 0%, 100%, 1); }
 
 .gmxApplication-noShadow { box-shadow: none; border: none; }
+
+.calendarContainer { position: absolute; top: 0px; right: 0px; box-sizing: border-box; height: 55px; pointer-events: auto; }
+.calendarContainer { border-radius: 2px; padding: 10px; background: #fff; box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65); }
+.calendarContainer-centerTable { display: table; width: 100%; height: 100%; }
+.calendarContainer-centerTableCell { display: table-cell; vertical-align: middle; }
+
+.gmxApplication-widgetsContainer_mobileSidebarOpened .calendarContainer { box-shadow: none; }
+.gmxApplication-widgetsContainer_withCalendar .iconSidebarWidget { top: 65px; border-radius: 2px; }
+
+.gmxApplication-noShadow.calendarContainer { box-shadow: none; }

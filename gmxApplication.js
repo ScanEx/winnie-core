@@ -41,7 +41,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     layersTreeWidget: false,
                     bookmarksWidget: false,
                     storytellingWidget: false,
-                    sidebarWidget: false
+                    sidebarWidget: false,
+                    calendarWidget: false
                 },
                 state: {
                     map: {
@@ -689,6 +690,89 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             components: config.state
         });
         return null;
+    });
+
+    cm.define('calendarContainer', ['widgetsContainerControl', 'hideControl', 'sidebarWidget', 'config'], function(cm) {
+        var config = cm.get('config');
+        var sidebarWidget = cm.get('sidebarWidget');
+        var widgetsContainerControl = cm.get('widgetsContainerControl');
+
+        if (!config.app.calendarWidget) {
+            return null;
+        }
+
+        var CalendarContainer = nsGmx.GmxWidget.extend({
+            className: 'calendarContainer',
+            initialize: function() {
+                this._terminateMouseEvents();
+                var $calendarContainerCenterTable = $('<div>').addClass('calendarContainer-centerTable').appendTo(this.$el);
+                this._calendarContainerCenterTableCell = $('<div>').addClass('calendarContainer-centerTableCell').appendTo($calendarContainerCenterTable);
+                if (nsGmx.Utils.isMobile()) {
+                    this.$el.addClass('calendarContainer_mobile');
+                } else {
+                    this.$el.addClass('calendarContainer_desktop');
+                }
+            },
+            getCalendarPlaceholder: function() {
+                return this._calendarContainerCenterTableCell;
+            }
+        });
+
+        var calendarContainer = new CalendarContainer();
+
+        $(widgetsContainerControl.getContainer()).append(calendarContainer.getContainer());
+        $(widgetsContainerControl.getContainer()).addClass('gmxApplication-widgetsContainer_withCalendar');
+
+        var hideControl = cm.get('hideControl');
+
+        hideControl.on('statechange', function(ev) {
+            ev.target.options.isActive ? $calendarContainer.show() : $calendarContainer.hide();
+        });
+
+        sidebarWidget.on('stick', function(e) {
+            if (e.isStuck) {
+                $(calendarContainer.getContainer()).addClass('gmxApplication-noShadow');
+            } else {
+                $(calendarContainer.getContainer()).removeClass('gmxApplication-noShadow');
+            }
+        });
+
+        return calendarContainer;
+    });
+
+    cm.define('calendarWidget', ['calendar', 'calendarContainer'], function(cm) {
+        var calendar = cm.get('calendar');
+        var calendarContainer = cm.get('calendarContainer');
+
+        if (!calendar || !calendarContainer) {
+            return null;
+        }
+
+        var calendarWidget = new nsGmx.CalendarWidget('demoCalendar', {
+            container: calendarContainer.getCalendarPlaceholder()[0],
+            dateFormat: 'dd-mm-yy',
+            minimized: true,
+            showSwitcher: true,
+            showTime: true,
+            dateMax: new Date()
+        });
+
+        $(calendarWidget).on('datechange', function(je) {
+            var dateBegin = calendarWidget.getDateBegin();
+            var dateEnd = calendarWidget.getDateEnd();
+            if (dateEnd.getTime() - dateBegin.getTime() < 12 * 60 * 60 * 1000) {
+                dateEnd = new Date(dateBegin.getTime() + 24 * 60 * 60 * 1000);
+            }
+            calendar.setDateBegin(dateBegin);
+            calendar.setDateEnd(dateEnd);
+        });
+
+        calendar.on('datechange', function (dateBegin, dateEnd) {
+            calendarWidget.setDateBegin(dateBegin);
+            calendarWidget.setDateEnd(dateEnd);
+        });
+
+        return calendarWidget;
     });
 
     return cm;
