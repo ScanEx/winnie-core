@@ -4,37 +4,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     var ComponentsManager = window.cm.ComponentsManager;
     var cm = new ComponentsManager();
 
-    function clone(o) {
-        var c = {};
-        for (k in o) {
-            if (o.hasOwnProperty(k)) {
-                c[k] = o[k];
-            }
-        }
-        return c;
-    }
-
-    function extend(a, b) {
-        for (p in b) {
-            if (b.hasOwnProperty(p)) {
-                a[p] = b[p];
-            }
-        }
-        return a;
-    }
-
-    var isMobile = (nsGmx && nsGmx.Utils && nsGmx.Utils.isMobile) || function() {
-        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    var isPhone = (nsGmx && nsGmx.Utils && nsGmx.Utils.isPhone) || function() {
-        return isMobile() && (screen.width <= 768);
-    }
-
     // returns config object
     cm.define('config', [], function(cm, cb) {
         var configConditions = function(config) {
@@ -140,7 +109,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('map', ['config'], function(cm, cb) {
         var config = cm.get('config')
-        var opts = clone(config.app.map);
+        var opts = config.app.map;
 
         if (config.app.zoomControl === 'leaflet') {
             opts.zoomControl = true;
@@ -282,7 +251,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var baseLayersManager = cm.get('baseLayersManager');
         if (config.app.baseLayersControl && L.Control.GmxIconLayers) {
-            var ctrl = new L.Control.GmxIconLayers(baseLayersManager, extend(config.app.baseLayersControl, {
+            var ctrl = new L.Control.GmxIconLayers(baseLayersManager, L.extend({}, config.app.baseLayersControl, {
                 language: nsGmx.Translations.getLanguage()
             }));
             map.addControl(ctrl);
@@ -550,13 +519,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             var sidebarWidget = new nsGmx.IconSidebarWidget(config.app.sidebarWidget);
             sidebarWidget.appendTo(widgetsContainer);
             sidebarWidget.on('opening', function() {
-                if (isPhone() && map) {
+                if (nsGmx.Utils.isPhone() && map) {
                     L.DomUtil.addClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.addClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
             });
             sidebarWidget.on('closing', function() {
-                if (isPhone() && map) {
+                if (nsGmx.Utils.isPhone() && map) {
                     L.DomUtil.removeClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.removeClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
@@ -600,7 +569,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             var container = sidebar.addTab('sidebarTab-layersTree', 'icon-layers');
 
             var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend({
-                isMobile: isMobile()
+                isMobile: nsGmx.Utils.isMobile()
             }, config.app.layersTreeWidget, {
                 layersTree: layersTree
             }));
