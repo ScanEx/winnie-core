@@ -814,22 +814,23 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return calendarContainer;
     });
 
-    cm.define('calendarWidget', ['calendar', 'calendarContainer'], function(cm) {
+    cm.define('calendarWidget', ['calendar', 'calendarContainer', 'config'], function(cm) {
+        var config = cm.get('config');
         var calendar = cm.get('calendar');
         var calendarContainer = cm.get('calendarContainer');
 
-        if (!calendar || !calendarContainer) {
+        if (!calendar || !calendarContainer || !config.app.calendarWidget) {
             return null;
         }
 
-        var calendarWidget = new nsGmx.CalendarWidget('demoCalendar', {
+        var calendarWidget = new nsGmx.CalendarWidget('demoCalendar', L.extend({
             container: calendarContainer.getCalendarPlaceholder()[0],
             dateFormat: 'dd-mm-yy',
             minimized: true,
             showSwitcher: true,
-            showTime: true,
+            showTime: false,
             dateMax: new Date()
-        });
+        }, config.app.calendarWidget));
 
         $(calendarWidget).on('datechange', function(je) {
             var dateBegin = calendarWidget.getDateBegin();
