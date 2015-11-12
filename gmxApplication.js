@@ -539,6 +539,27 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
+    cm.define('layersHeatmaps', ['config', 'layersHash'], function(cm) {
+        var config = cm.get('config');
+        var layersHash = cm.get('layersHash');
+        if (!config.layers) {
+            return null;
+        }
+        for (var layerId in config.layers) {
+            var layer = layersHash[layerId]
+            if (
+                config.layers.hasOwnProperty(layerId) &&
+                config.layers[layerId].heatmap &&
+                layer
+            ) {
+                var opts = L.extend({}, config.layers[layerId].heatmap);
+                layer.bindHeatMap(opts);
+            }
+        }
+        return null;
+    });
+
+
     cm.define('layersTranslations', ['config', 'layersTree'], function(cm) {
         var config = cm.get('config');
         var layersTree = cm.get('layersTree');
