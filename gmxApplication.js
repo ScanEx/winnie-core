@@ -821,7 +821,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var hideControl = cm.get('hideControl');
 
         hideControl && hideControl.on('statechange', function(ev) {
-            ev.target.options.isActive ? $calendarContainer.show() : $calendarContainer.hide();
+            ev.target.options.isActive ? calendarContainer.show() : calendarContainer.hide();
         });
 
         sidebarWidget && sidebarWidget.on('stick', function(e) {
