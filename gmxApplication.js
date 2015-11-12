@@ -384,12 +384,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 },
                 setDateBegin: function(dateBegin) {
                     this.set({
-                        dateBegin: dateBegin
+                        dateBegin: new Date(dateBegin)
                     });
                 },
                 setDateEnd: function(dateEnd) {
                     this.set({
-                        dateEnd: dateEnd
+                        dateEnd: new Date(dateEnd)
                     });
                 },
                 getDateBegin: function() {
