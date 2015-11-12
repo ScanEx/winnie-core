@@ -803,7 +803,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             ev.target.options.isActive ? $calendarContainer.show() : $calendarContainer.hide();
         });
 
-        sidebarWidget.on('stick', function(e) {
+        sidebarWidget && sidebarWidget.on('stick', function(e) {
             if (e.isStuck) {
                 $(calendarContainer.getContainer()).addClass('gmxApplication-noShadow');
             } else {
