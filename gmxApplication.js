@@ -85,22 +85,69 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
+    cm.define('urlManager', [], function(cm) {
+        var parser = document.createElement('a');
+        parser.href = window.location.href;
+
+        var getQueryVariable = function(variable) {
+            var query = parser.search.substring(1);
+            var vars = query.split('&');
+            for (var i = 0; i < vars.length; i++) {
+                var pair = vars[i].split('=');
+                if (decodeURIComponent(pair[0]) == variable) {
+                    return decodeURIComponent(pair[1]);
+                }
+            }
+        };
+
+        return {
+            getParam: getQueryVariable
+        };
+    });
+
     cm.define('i18n', ['config'], function(cm) {
         var config = cm.get('config');
-        if (!L.gmxLocale || !L.gmxLocale.setLanguage) {
-            return false;
-        }
-        var lang = config.state.language || (nsGmx.Translations && nsGmx.Translations.getLanguage());
+        var urlManager = cm.get('urlManager');
+        var urlLangParam = urlManager.getParam('lang') && (
+            urlManager.getParam('lang') === 'eng' ||
+            urlManager.getParam('lang') === 'rus'
+        );
+        var lang = urlLangParam || config.state.language || (nsGmx.Translations && nsGmx.Translations.getLanguage());
         if (lang) {
-            L.gmxLocale.setLanguage(lang);
+            L.gmxLocale && L.gmxLocale.setLanguage(lang);
             nsGmx.Translations && nsGmx.Translations.setLanguage(lang);
         }
         return null;
     });
 
-    cm.define('permalinkManager', [], function(cm) {
-        if (nsGmx.PermalinkManager) {
-            return new nsGmx.PermalinkManager();
+    cm.define('mapsResourceServer', [], function(cm) {
+        if (nsGmx.Auth && nsGmx.Auth.Server) {
+            return new nsGmx.Auth.Server({
+                root: 'http://maps.kosmosnimki.ru'
+            });
+        } else {
+            return null;
+        }
+    });
+
+    cm.define('permalinkManager', ['mapsResourceServer', 'urlManager'], function(cm, cb) {
+        var urlManager = cm.get('urlManager');
+        var mapsResourceServer = cm.get('mapsResourceServer');
+        if (nsGmx.PermalinkManager && mapsResourceServer) {
+            var permalinkManager = new nsGmx.PermalinkManager({
+                provider: mapsResourceServer
+            });
+            var permalinkId = urlManager.getParam('permalink');
+            if (permalinkId) {
+                permalinkManager.loadFromId(permalinkId).then(function() {
+                    cb(permalinkManager);
+                }, function() {
+                    console.warn('failed to load permalink ' + permalinkId);
+                    cb(permalinkManager);
+                });
+            } else {
+                return permalinkManager;
+            }
         } else if (nsGmx.StateManager) {
             return new nsGmx.StateManager();
         } else {
@@ -108,7 +155,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('map', ['config'], function(cm, cb) {
+    cm.define('map', ['config', 'permalinkManager'], function(cm, cb) {
         var config = cm.get('config')
         var opts = config.app.map;
 
@@ -863,7 +910,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             calendar.setDateEnd(dateEnd);
         });
 
-        calendar.on('datechange', function (dateBegin, dateEnd) {
+        calendar.on('datechange', function(dateBegin, dateEnd) {
             calendarWidget.setDateBegin(dateBegin);
             calendarWidget.setDateEnd(dateEnd);
         });
