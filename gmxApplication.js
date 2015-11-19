@@ -795,12 +795,14 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('storytellingWidget', ['map', 'config', 'rawTree', 'calendar', 'widgetsContainer'], function(cm) {
-        var config = cm.get('config');
+    cm.define('storytellingWidget', ['widgetsContainer', 'permalinkManager', 'calendar', 'rawTree', 'config', 'map'], function(cm) {
         var widgetsContainer = cm.get('widgetsContainer');
-        var rawTree = cm.get('rawTree');
-        var map = cm.get('map');
+        var permalinkManager = cm.get('permalinkManager');
         var calendar = cm.get('calendar');
+        var rawTree = cm.get('rawTree');
+        var config = cm.get('config');
+        var map = cm.get('map');
+
         if (config.app.storytellingWidget) {
             var storytellingWidget = new nsGmx.StorytellingWidget({
                 bookmarks: JSON.parse(rawTree.properties.UserData).tabs
@@ -809,13 +811,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             storytellingWidget.appendTo(widgetsContainer);
 
             storytellingWidget.on('storyChanged', function(story) {
-                map.panTo(L.Projection.Mercator.unproject(new L.Point(
-                    story.state.position.x,
-                    story.state.position.y
-                )));
-
-                calendar.setDateBegin(new Date(story.state.customParamsCollection.commonCalendar.dateBegin));
-                calendar.setDateEnd(new Date(story.state.customParamsCollection.commonCalendar.dateEnd));
+                permalinkManager && permalinkManager.loadFromData(story.state)
             });
 
             return storytellingWidget;
