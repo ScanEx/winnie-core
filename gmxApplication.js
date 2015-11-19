@@ -130,9 +130,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('permalinkManager', ['mapsResourceServer', 'urlManager'], function(cm, cb) {
-        var urlManager = cm.get('urlManager');
+    cm.define('permalinkManager', ['mapsResourceServer', 'urlManager', 'config'], function(cm, cb) {
         var mapsResourceServer = cm.get('mapsResourceServer');
+        var urlManager = cm.get('urlManager');
+        var config = cm.get('config');
+
         if (nsGmx.PermalinkManager && mapsResourceServer) {
             var permalinkManager = new nsGmx.PermalinkManager({
                 provider: mapsResourceServer
@@ -145,6 +147,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     console.warn('failed to load permalink ' + permalinkId);
                     cb(permalinkManager);
                 });
+            } else if (config.state) {
+                permalinkManager.loadFromData(config.state);
+                return permalinkManager;
             } else {
                 return permalinkManager;
             }
@@ -818,16 +823,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         } else {
             return null;
         }
-    });
-
-    cm.define('stateLoader', ['config', 'permalinkManager', 'mapSerializer', 'layersTree', 'baseLayersManager', 'calendar'], function(cm) {
-        var config = cm.get('config');
-        var permalinkManager = cm.get('permalinkManager');
-        config.state && permalinkManager && permalinkManager.loadFromData({
-            version: '3.0.0',
-            components: config.state
-        });
-        return null;
     });
 
     cm.define('calendarContainer', ['widgetsContainerControl', 'hideControl', 'sidebarWidget', 'config'], function(cm) {
