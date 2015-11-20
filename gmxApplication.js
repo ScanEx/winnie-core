@@ -494,60 +494,46 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     // однако позволяет запретить отображать какой-либо слой, тем самым
     // передавая управляение его видимостью
     cm.define('layersMapper', ['config', 'map', 'layersHash', 'layersTree'], function(cm) {
-        var map = cm.get('map');
-        var layersHash = cm.get('layersHash');
-        var layersTree = cm.get('layersTree');
-        var config = cm.get('config');
+        var LayersMapper = L.Class.extend({
+            options: {
+                map: null,
+                layersHash: null,
+                layersTree: null
+            },
+            initialize: function(options) {
+                this._map = options.map;
+                this._layersHash = L.extend({}, options.layersHash);
 
-        if (config.app.layersMapper) {
-            if (!map || !layersHash || !layersTree) {
-                return false;
-            }
-
-            var blacklist = [];
-
-            layersTree.on('childChange', function(model) {
-                if (model.changedAttributes().hasOwnProperty('visible')) {
-                    var id = model.get('properties').LayerID || model.get('properties').GroupID;
-                    if (model.changedAttributes().visible) {
-                        layersHash[id] && (blacklist.indexOf(id) === -1) && map.addLayer(layersHash[id]);
-                    } else {
-                        layersHash[id] && (blacklist.indexOf(id) === -1) && map.removeLayer(layersHash[id]);
+                options.layersTree.on('childChange', function(model) {
+                    if (model.changedAttributes().hasOwnProperty('visible')) {
+                        this._updateLayerVisibility(model);
                     }
-                }
-            });
+                }.bind(this));
 
-            layersTree.eachNode(function(model) {
+                options.layersTree.eachNode(function(model) {
+                    this._updateLayerVisibility(model);
+                }.bind(this), true);
+            },
+            _updateLayerVisibility: function(model) {
+                var id = model.get('properties').LayerID;
+                if (!id || !this._layersHash[id]) {
+                    return;
+                }
                 if (model.get('visible')) {
-                    var id = model.get('properties').LayerID;
-                    layersHash[id] && map.addLayer(layersHash[id]);
+                    this._map.addLayer(this._layersHash[id]);
+                } else {
+                    this._map.removeLayer(this._layersHash[id]);
                 }
-            }, true);
-
-            var allowLayer = function(id) {
-                (blacklist.indexOf(id) !== -1) && blacklist.splice(blacklist.indexOf(id), 1);
-            };
-
-            var denyLayer = function(id) {
-                (blacklist.indexOf(id) === -1) && layersHash[id] && blacklist.push(id);
-            };
-
-            var addLayer = function(id) {
-                allowLayer(id);
-                layersHash[id] && map.addLayer(layersHash[id]);
-            };
-
-            var removeLayer = function(id) {
-                denyLayer(id);
-                layersHash[id] && map.removeLayer(layersHash[id]);
-            };
-
-            return {
-                allowLayer: allowLayer,
-                denyLayer: denyLayer,
-                addLayer: addLayer,
-                removeLayer: removeLayer
             }
+        })
+
+        var config = cm.get('config');
+        if (config.app.layersMapper) {
+            return new LayersMapper({
+                map: cm.get('map'),
+                layersHash: cm.get('layersHash'),
+                layersTree: cm.get('layersTree')
+            })
         } else {
             return null;
         }
