@@ -148,13 +148,21 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     cb(permalinkManager);
                 });
             } else if (config.state) {
-                permalinkManager.loadFromData(config.state);
+                permalinkManager.loadFromData({
+                    version: '3.0.0',
+                    components: config.state
+                });
                 return permalinkManager;
             } else {
                 return permalinkManager;
             }
         } else if (nsGmx.StateManager) {
-            return new nsGmx.StateManager();
+            var permalinkManager = new nsGmx.StateManager();
+            permalinkManager.loadFromData({
+                version: '3.0.0',
+                components: config.state
+            });
+            return permalinkManager;
         } else {
             return null;
         }
