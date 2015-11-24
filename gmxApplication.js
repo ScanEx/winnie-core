@@ -105,13 +105,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         };
     });
 
-    cm.define('i18n', ['config'], function(cm) {
+    cm.define('i18n', ['config', 'urlManager'], function(cm) {
         var config = cm.get('config');
         var urlManager = cm.get('urlManager');
-        var urlLangParam = urlManager.getParam('lang') && (
+        var urlLangParam = (
             urlManager.getParam('lang') === 'eng' ||
             urlManager.getParam('lang') === 'rus'
-        );
+        ) && urlManager.getParam('lang');
         var lang = urlLangParam || config.state.language || (nsGmx.Translations && nsGmx.Translations.getLanguage());
         if (lang) {
             L.gmxLocale && L.gmxLocale.setLanguage(lang);
