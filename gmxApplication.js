@@ -497,10 +497,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    // компонент, управляющий отображением слоёв на карте
-    // В нормальном порядке просто отображает видимые слои из layersTree,
-    // однако позволяет запретить отображать какой-либо слой, тем самым
-    // передавая управляение его видимостью
     cm.define('layersMapper', ['config', 'map', 'layersHash', 'layersTree'], function(cm) {
         var LayersMapper = L.Class.extend({
             options: {
@@ -534,7 +530,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 this._updateLayerVisibility(model);
             },
             _updateLayerVisibility: function(model) {
-                var id = model.get('properties').LayerID;
+                var id = model.get('properties').name;
                 if (!id || !this._layersHash[id]) {
                     return;
                 }
@@ -615,7 +611,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
         return null;
     });
-
 
     cm.define('layersTranslations', ['config', 'layersTree'], function(cm) {
         var config = cm.get('config');
