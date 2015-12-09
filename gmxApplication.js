@@ -25,6 +25,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     gmxMap: {
                         setZIndex: true
                     },
+                    permalinkManager: {},
                     hideControl: {},
                     zoomControl: {},
                     centerControl: {
@@ -135,11 +136,15 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var urlManager = cm.get('urlManager');
         var config = cm.get('config');
 
+        if (!config.app.permalinkManager) {
+            return null;
+        }
+
         if (nsGmx.PermalinkManager && mapsResourceServer) {
             var permalinkManager = new nsGmx.PermalinkManager({
                 provider: mapsResourceServer
             });
-            var permalinkId = urlManager.getParam('permalink');
+            var permalinkId = config.app.permalinkManager.permalinkId;
             if (permalinkId) {
                 permalinkManager.loadFromId(permalinkId).then(function() {
                     cb(permalinkManager);
