@@ -13,6 +13,7 @@
 .gmxApplication-widgetsContainer .iconSidebarWidget.iconSidebarWidget-afterAnimation-bottom { bottom: 0px; }
 
 .gmxApplication-centerbsControlCorner { background-color: hsla(0, 0%, 100%, 0); transition: background-color .5s ease; }
+.gmxApplication-centerbsControlCorner-ie9 { } /* в IE9 background не даёт кликнуть по слоям */
 .gmxApplication-centerbsControlCorner-fadeIn { background-color: hsla(0, 0%, 100%, 1); }
 
 .gmxApplication-noShadow { box-shadow: none; border: none; }

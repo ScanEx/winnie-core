@@ -169,7 +169,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('centerbsControlCorner', ['map'], function(cm) {
         var map = cm.get('map');
-        var el = L.DomUtil.create('div', 'leaflet-top leaflet-bottom leaflet-left leaflet-right gmx-bottom-shift gmxApplication-centerbsControlCorner', map._controlContainer);
+        var el = L.DomUtil.create('div', 'leaflet-top leaflet-bottom leaflet-left leaflet-right gmx-bottom-shift', map._controlContainer);
+        L.DomUtil.addClass(el, L.Browser.ie ? 'gmxApplication-centerbsControlCorner-ie9' : 'gmxApplication-centerbsControlCorner');
         map._controlCorners['centerbs'] = el;
         return {
             fadeIn: function() {
