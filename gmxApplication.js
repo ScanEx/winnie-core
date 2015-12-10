@@ -86,34 +86,14 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('urlManager', [], function(cm) {
-        var parser = document.createElement('a');
-        parser.href = window.location.href;
-
-        var getQueryVariable = function(variable) {
-            var query = parser.search.substring(1);
-            var vars = query.split('&');
-            for (var i = 0; i < vars.length; i++) {
-                var pair = vars[i].split('=');
-                if (decodeURIComponent(pair[0]) == variable) {
-                    return decodeURIComponent(pair[1]);
-                }
-            }
-        };
-
-        return {
-            getParam: getQueryVariable
-        };
-    });
-
-    cm.define('i18n', ['config', 'urlManager'], function(cm) {
+    cm.define('i18n', ['config'], function(cm) {
         var config = cm.get('config');
-        var urlManager = cm.get('urlManager');
-        var urlLangParam = (
-            urlManager.getParam('lang') === 'eng' ||
-            urlManager.getParam('lang') === 'rus'
-        ) && urlManager.getParam('lang');
-        var lang = urlLangParam || config.state.language || (nsGmx.Translations && nsGmx.Translations.getLanguage());
+
+        if (!config.app.i18n) {
+            return false;
+        }
+
+        var lang = config.state.language || config.app.i18n.language || (nsGmx.Translations && nsGmx.Translations.getLanguage());
         if (lang) {
             L.gmxLocale && L.gmxLocale.setLanguage(lang);
             nsGmx.Translations && nsGmx.Translations.setLanguage(lang);
@@ -131,9 +111,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('permalinkManager', ['mapsResourceServer', 'urlManager', 'config'], function(cm, cb) {
+    cm.define('permalinkManager', ['mapsResourceServer', 'config'], function(cm, cb) {
         var mapsResourceServer = cm.get('mapsResourceServer');
-        var urlManager = cm.get('urlManager');
         var config = cm.get('config');
 
         if (!config.app.permalinkManager) {
