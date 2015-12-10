@@ -437,6 +437,25 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                         dateEnd: new Date(dateEnd)
                     });
                 },
+                setDateInterval: function(dateBegin, dateEnd) {
+                    if (
+                        (new Date(dateBegin)).getTime() === this.get('dateBegin').getTime() &&
+                        (new Date(dateEnd)).getTime() === this.get('dateEnd').getTime()
+                    ) {
+                        return null;
+                    }
+                    this.set({
+                        dateBegin: new Date(dateBegin)
+                    }, {
+                        silent: true
+                    });
+                    this.set({
+                        dateEnd: new Date(dateEnd)
+                    }, {
+                        silent: true
+                    });
+                    this.trigger('datechange', this.get('dateBegin'), this.get('dateEnd'));
+                },
                 getDateBegin: function() {
                     return this.get('dateBegin');
                 },
@@ -444,8 +463,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     return this.get('dateEnd');
                 },
                 loadState: function(state) {
-                    this.setDateBegin(state.dateBegin);
-                    this.setDateEnd(state.dateEnd);
+                    this.setDateInterval(state.dateBegin, state.dateEnd);
                 },
                 saveState: function() {
                     return {
