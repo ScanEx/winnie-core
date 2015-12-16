@@ -25,6 +25,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     gmxMap: {
                         setZIndex: true
                     },
+                    i18n: {},
                     permalinkManager: {},
                     hideControl: {},
                     zoomControl: {},
