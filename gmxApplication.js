@@ -90,7 +90,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     cm.define('i18n', ['config'], function(cm) {
         var config = cm.get('config');
 
-        if (!config.app.i18n) {
+        if (!(config.app.i18n && nsGmx.Translations)) {
             return false;
         }
 
@@ -99,7 +99,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             L.gmxLocale && L.gmxLocale.setLanguage(lang);
             nsGmx.Translations && nsGmx.Translations.setLanguage(lang);
         }
-        return null;
+        return nsGmx.Translations;
     });
 
     cm.define('mapsResourceServer', [], function(cm) {
@@ -301,13 +301,15 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         });
     });
 
-    cm.define('baseLayersControl', ['map', 'baseLayersManager', 'i18n'], function(cm, cb) {
-        var map = cm.get('map');
-        var config = cm.get('config');
+    cm.define('baseLayersControl', ['baseLayersManager', 'config', 'i18n', 'map'], function(cm, cb) {
         var baseLayersManager = cm.get('baseLayersManager');
+        var config = cm.get('config');
+        var i18n = cm.get('i18n');
+        var map = cm.get('map');
+
         if (config.app.baseLayersControl && L.Control.GmxIconLayers) {
             var ctrl = new L.Control.GmxIconLayers(baseLayersManager, L.extend(config.app.baseLayersControl, {
-                language: nsGmx.Translations.getLanguage()
+                language: i18n.getLanguage()
             }));
             map.addControl(ctrl);
             return ctrl;
@@ -582,9 +584,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return null;
     });
 
-    cm.define('layersTranslations', ['config', 'layersTree'], function(cm) {
-        var config = cm.get('config');
+    cm.define('layersTranslations', ['layersTree', 'config', 'i18n'], function(cm) {
         var layersTree = cm.get('layersTree');
+        var config = cm.get('config');
+        var i18n = cm.get('i18n');
+
         var translatableProperties = ['title', 'description'];
         if (!config.layers) {
             return null;
@@ -596,7 +600,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 var layerProperties = layer.get('properties');
                 for (var i = 0; i < translatableProperties.length; i++) {
                     var prop = translatableProperties[i];
-                    var lang = nsGmx.Translations.getLanguage();
+                    var lang = i18n.getLanguage();
                     if (
                         props[prop] &&
                         props[prop][lang] &&
@@ -622,6 +626,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         function mapDate() {
             for (layer in layersHash) {
                 if (layersHash.hasOwnProperty(layer)) {
+                    console.log('sdi');
                     layersHash[layer].setDateInterval(calendar.get('dateBegin'), calendar.get('dateEnd'));
                 }
             }
@@ -804,6 +809,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return null;
         }
 
+        if (!(window.$ && window.nsGmx.GmxWidget && window.nsGmx.Utils)) {
+            return false;
+        }
+
         var CalendarContainer = nsGmx.GmxWidget.extend({
             className: 'calendarContainer',
             initialize: function() {
@@ -852,7 +861,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return null;
         }
 
-        var calendarWidget = new nsGmx.CalendarWidget(L.extend({
+        var calendarWidget = new nsGmx.FireCalendarWidget(L.extend({
             dateInterval: calendar,
             container: calendarContainer.getCalendarPlaceholder()[0],
             dateFormat: 'dd-mm-yy',
