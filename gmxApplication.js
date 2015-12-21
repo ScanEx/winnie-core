@@ -291,7 +291,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return e.trim().slice(1, -1)
         });
         if (!map.gmxBaseLayersManager) {
-            console.error('no base baseLayersManager found');
             return false;
         }
         map.gmxBaseLayersManager.initDefaults().then(function() {
@@ -318,6 +317,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('logoControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.copyrightControl;
+        if (!window.L.control.gmxLogo) {
+            return false;
+        }
         var ctrl = L.control.gmxLogo(
             (typeof opts === 'object') ? opts : {}
         );
@@ -327,6 +329,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('hideControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.hideControl;
+        if (!window.L.control.gmxHide) {
+            return false;
+        }
         if (opts) {
             var ctrl = L.control.gmxHide(
                 (typeof opts === 'object') ? opts : {}
@@ -340,6 +345,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('zoomControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.zoomControl;
+        if (!window.L.control.gmxZoom) {
+            return false;
+        }
         if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxZoom(
                 (typeof opts === 'object') ? opts : {}
@@ -353,6 +361,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('centerControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.centerControl;
+        if (!window.L.control.gmxCenter) {
+            return false;
+        }
         if (opts) {
             var ctrl = L.control.gmxCenter(
                 (typeof opts === 'object') ? opts : {}
@@ -366,6 +377,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('bottomControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.bottomControl;
+        if (!window.L.control.gmxBottom) {
+            return false;
+        }
         if (opts) {
             var ctrl = L.control.gmxBottom(
                 (typeof opts === 'object') ? opts : {}
@@ -379,6 +393,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('locationControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.locationControl;
+        if (!window.L.control.gmxLocation) {
+            return false;
+        }
         if (opts) {
             var ctrl = L.control.gmxLocation(
                 (typeof opts === 'object') ? opts : {}
@@ -392,6 +409,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('copyrightControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.copyrightControl;
+        if (!window.L.control.gmxCopyright) {
+            return false;
+        }
         if (opts && opts !== 'leaflet') {
             var ctrl = L.control.gmxCopyright(
                 (typeof opts === 'object') ? opts : {}
@@ -405,6 +425,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('loaderStatusControl', ['map', 'config', 'i18n'], function(cm) {
         var opts = cm.get('config').app.loaderStatusControl;
+        if (!window.L.control.gmxLoaderStatus) {
+            return false;
+        }
         if (opts) {
             var ctrl = L.control.gmxLoaderStatus(
                 (typeof opts === 'object') ? opts : {}
@@ -418,18 +441,15 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
     cm.define('calendar', ['permalinkManager'], function(cm) {
         var permalinkManager = cm.get('permalinkManager');
-        if (Backbone) {
-            var cal = new nsGmx.DateInterval({
-                // dateBegin: new Date(Date.now() - 24 * 60 * 60 * 1000),
-                // dateEnd: new Date()
-            });
 
-            permalinkManager && permalinkManager.setIdentity('calendar', cal);
-
-            return cal;
-        } else {
+        if (!(window.Backbone && window.nsGmx && window.nsGmx.DateInterval)) {
             return false;
         }
+
+        var cal = new nsGmx.DateInterval();
+        permalinkManager && permalinkManager.setIdentity('calendar', cal);
+
+        return cal;
     });
 
     cm.define('layersTree', ['rawTree', 'permalinkManager'], function(cm) {
