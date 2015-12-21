@@ -291,6 +291,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return e.trim().slice(1, -1)
         });
         if (!map.gmxBaseLayersManager) {
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
             return false;
         }
         map.gmxBaseLayersManager.initDefaults().then(function() {
