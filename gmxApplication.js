@@ -419,65 +419,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     cm.define('calendar', ['permalinkManager'], function(cm) {
         var permalinkManager = cm.get('permalinkManager');
         if (Backbone) {
-            var cal = new(Backbone.Model.extend({
-                initialize: function() {
-                    this.on('change:dateBegin', function() {
-                        this.trigger('datechange', this.get('dateBegin'), this.get('dateEnd'));
-                    }.bind(this));
-                    this.on('change:dateEnd', function() {
-                        this.trigger('datechange', this.get('dateBegin'), this.get('dateEnd'));
-                    }.bind(this));
-                },
-                setDateBegin: function(dateBegin) {
-                    this.set({
-                        dateBegin: new Date(dateBegin)
-                    });
-                },
-                setDateEnd: function(dateEnd) {
-                    this.set({
-                        dateEnd: new Date(dateEnd)
-                    });
-                },
-                setDateInterval: function(dateBegin, dateEnd) {
-                    if (
-                        (new Date(dateBegin)).getTime() === this.get('dateBegin').getTime() &&
-                        (new Date(dateEnd)).getTime() === this.get('dateEnd').getTime()
-                    ) {
-                        return null;
-                    }
-                    this.set({
-                        dateBegin: new Date(dateBegin)
-                    }, {
-                        silent: true
-                    });
-                    this.set({
-                        dateEnd: new Date(dateEnd)
-                    }, {
-                        silent: true
-                    });
-                    this.trigger('datechange', this.get('dateBegin'), this.get('dateEnd'));
-                },
-                getDateBegin: function() {
-                    return this.get('dateBegin');
-                },
-                getDateEnd: function() {
-                    return this.get('dateEnd');
-                },
-                loadState: function(state) {
-                    this.setDateInterval(state.dateBegin, state.dateEnd);
-                },
-                saveState: function() {
-                    return {
-                        dateBegin: this.getDateBegin(),
-                        dateEnd: this.getDateEnd()
-                    }
-                }
-            }))();
-
-            var now = new Date();
-
-            cal.setDateBegin(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
-            cal.setDateEnd(new Date());
+            var cal = new nsGmx.DateInterval({
+                // dateBegin: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                // dateEnd: new Date()
+            });
 
             permalinkManager && permalinkManager.setIdentity('calendar', cal);
 
@@ -648,18 +593,18 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var layersHash = cm.get('layersHash');
         var calendar = cm.get('calendar');
 
-        var mapDate = function(dateBegin, dateEnd) {
-            for (layer in layersHash) {
-                if (layersHash.hasOwnProperty(layer)) {
-                    layersHash[layer].setDateInterval(dateBegin, dateEnd);
-                }
-            }
-        };
-
-        calendar.on('datechange', mapDate);
-        mapDate(calendar.getDateBegin(), calendar.getDateEnd());
+        calendar.on('change', mapDate);
+        mapDate();
 
         return null;
+
+        function mapDate() {
+            for (layer in layersHash) {
+                if (layersHash.hasOwnProperty(layer)) {
+                    layersHash[layer].setDateInterval(calendar.get('dateBegin'), calendar.get('dateEnd'));
+                }
+            }
+        }
     });
 
     cm.define('sidebarWidget', ['config', 'widgetsContainer', 'centerbsControlCorner', 'map'], function(cm) {
@@ -886,29 +831,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return null;
         }
 
-        var calendarWidget = new nsGmx.CalendarWidget('demoCalendar', L.extend({
+        var calendarWidget = new nsGmx.CalendarWidget(L.extend({
+            dateInterval: calendar,
             container: calendarContainer.getCalendarPlaceholder()[0],
             dateFormat: 'dd-mm-yy',
-            minimized: true,
-            showSwitcher: true,
-            showTime: false,
             dateMax: new Date()
         }, config.app.calendarWidget));
-
-        $(calendarWidget).on('datechange', function(je) {
-            var dateBegin = calendarWidget.getDateBegin();
-            var dateEnd = calendarWidget.getDateEnd();
-            if (dateEnd.getTime() - dateBegin.getTime() < 12 * 60 * 60 * 1000) {
-                dateEnd = new Date(dateBegin.getTime() + 24 * 60 * 60 * 1000);
-            }
-            calendar.setDateBegin(dateBegin);
-            calendar.setDateEnd(dateEnd);
-        });
-
-        calendar.on('datechange', function(dateBegin, dateEnd) {
-            calendarWidget.setDateBegin(dateBegin);
-            calendarWidget.setDateEnd(dateEnd);
-        });
 
         return calendarWidget;
     });
