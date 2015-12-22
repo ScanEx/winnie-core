@@ -44,7 +44,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     bookmarksWidget: false,
                     storytellingWidget: false,
                     sidebarWidget: false,
-                    calendarWidget: false
+                    calendarWidget: false,
+                    globals: false
                 },
                 state: {
                     map: {
@@ -873,6 +874,21 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }, config.app.calendarWidget));
 
         return calendarWidget;
+    });
+
+    cm.define('globals', ['layersTree', 'layersHash', 'calendar', 'rawTree', 'config', 'map'], function() {
+        if (!cm.get('config').app.globals) {
+            return null;
+        }
+
+        window.cal = cm.get('calendar');
+        window.lt = cm.get('layersTree');
+        window.lh = cm.get('layersHash');
+        window.rt = cm.get('rawTree');
+        window.cfg = cm.get('config');
+        window.map = cm.get('map');
+
+        return null;
     });
 
     return cm;
