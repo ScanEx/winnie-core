@@ -683,46 +683,51 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('layersTreeWidget', ['config', 'layersTree', 'sidebarWidget'], function(cm) {
-        var config = cm.get('config');
-        var sidebar = cm.get('sidebarWidget');
+    cm.define('layersTreeWidget', ['sidebarWidget', 'layersTree', 'config'], function(cm) {
+        var sidebarWidget = cm.get('sidebarWidget');
         var layersTree = cm.get('layersTree');
-        if (config.app.layersTreeWidget && nsGmx.LayersTreeWidget && layersTree && sidebar) {
-            var container = sidebar.addTab('sidebarTab-layersTree', 'icon-layers');
+        var config = cm.get('config');
 
-            var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend({
-                isMobile: nsGmx.Utils.isMobile()
-            }, config.app.layersTreeWidget, {
-                layersTree: layersTree
-            }));
+        if (!(nsGmx.LayersTreeWidget && layersTree && sidebarWidget)) {
+            return false;
+        }
 
-            if (nsGmx.ScrollView) {
-                var scrollView = new nsGmx.ScrollView({
-                    views: [layersTreeWidget]
-                });
-
-                $(window).on('resize', function() {
-                    scrollView.repaint();
-                });
-
-                function repaint(le) {
-                    if (le.id === 'sidebarTab-layersTree') {
-                        scrollView.repaint();
-                    }
-                }
-                sidebar.on('content', repaint);
-                sidebar.on('opened', repaint);
-                sidebar.on('stick', repaint);
-
-                scrollView.appendTo(container);
-            } else {
-                layersTreeWidget.appendTo(container);
-            }
-
-            return layersTreeWidget;
-        } else {
+        if (!config.app.layersTreeWidget) {
             return null;
         }
+
+        var container = sidebarWidget.addTab('sidebarTab-layersTree', 'icon-layers');
+
+        var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend({
+            isMobile: nsGmx.Utils.isMobile()
+        }, config.app.layersTreeWidget, {
+            layersTree: layersTree
+        }));
+
+        if (nsGmx.ScrollView) {
+            var scrollView = new nsGmx.ScrollView({
+                views: [layersTreeWidget]
+            });
+
+            $(window).on('resize', function() {
+                scrollView.repaint();
+            });
+
+            function repaint(le) {
+                if (le.id === 'sidebarTab-layersTree') {
+                    scrollView.repaint();
+                }
+            }
+            sidebarWidget.on('content', repaint);
+            sidebarWidget.on('opened', repaint);
+            sidebarWidget.on('stick', repaint);
+
+            scrollView.appendTo(container);
+        } else {
+            layersTreeWidget.appendTo(container);
+        }
+
+        return layersTreeWidget;
     });
 
     cm.define('bookmarksWidget', ['map', 'rawTree', 'sidebarWidget', 'permalinkManager'], function(cm) {
