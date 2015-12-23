@@ -866,7 +866,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return null;
         }
 
-        var calendarWidget = new nsGmx.FireCalendarWidget(L.extend({
+        var calendarClass = config.app.calendarWidget.type === 'fire' ? 
+            nsGmx.FireCalendarWidget : 
+            nsGmx.CalendarWidget;
+
+        var calendarWidget = new calendarClass(L.extend({
             dateInterval: calendar,
             container: calendarContainer.getCalendarPlaceholder()[0],
             dateFormat: 'dd-mm-yy',
