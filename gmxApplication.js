@@ -88,6 +88,16 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
+    cm.define('resetter', [], function(cm) {
+        return new(L.Class.extend({
+            includes: [L.Mixin.Events],
+            initialize: function() {},
+            reset: function() {
+                this.fire('reset');
+            }
+        }));
+    });
+
     cm.define('i18n', ['config'], function(cm) {
         var config = cm.get('config');
 
@@ -154,8 +164,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('map', ['config', 'permalinkManager'], function(cm, cb) {
-        var config = cm.get('config')
+    cm.define('map', ['permalinkManager', 'resetter', 'config'], function(cm, cb) {
+        var resetter = cm.get('resetter');
+        var config = cm.get('config');
         var opts = config.app.map;
 
         if (config.app.zoomControl === 'leaflet') {
@@ -166,7 +177,71 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             opts.attributionControl = true;
         }
 
-        return L.map(container[0] || container, opts);
+        var map = L.map(container[0] || container, opts);
+
+        map.on('click zoomstart dragend', function(le) {
+            resetter.reset();
+        });
+
+        resetter.on('reset', function() {
+            map.closePopup();
+        });
+
+        return map;
+    });
+
+    cm.define('mapActiveArea', ['map'], function(cm) {
+        if (!cm.get('map').setActiveArea) {
+            return false;
+        }
+
+        return new(L.Class.extend({
+            initialize: function(options) {
+                this.options = L.setOptions(this, options);
+                this.resetActiveArea();
+            },
+            setActiveArea: function() {
+                this.options.map.setActiveArea.apply(this.options.map, arguments);
+            },
+            resetActiveArea: function() {
+                this.setActiveArea({
+                    position: 'absolute',
+                    border: '1 px solid red',
+                    left: '0',
+                    top: '0',
+                    bottom: '0',
+                    right: '0'
+                });
+            }
+        }))({
+            map: cm.get('map')
+        });
+    });
+
+    // TODO: use controls manager
+    cm.define('mapLayoutHelper', ['map'], function(cm) {
+        return new(L.Class.extend({
+            initialize: function(cm) {
+                this.cm = cm;
+            },
+            showBottomControls: function() {
+                this._getBottomControls().map(function(ctrl) {
+                    L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
+                });
+            },
+            hideBottomControls: function() {
+                this._getBottomControls().map(function(ctrl) {
+                    L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
+                });
+            },
+            _getBottomControls: function() {
+                var bottomControls = [];
+                this.cm.get('bottomControl') && bottomControls.push(cm.get('bottomControl'));
+                this.cm.get('copyrightControl') && bottomControls.push(cm.get('copyrightControl'));
+                this.cm.get('logoControl') && bottomControls.push(cm.get('logoControl'));
+                return bottomControls;
+            }
+        }))(cm);
     });
 
     cm.define('centerbsControlCorner', ['map'], function(cm) {
@@ -633,11 +708,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('sidebarWidget', ['config', 'widgetsContainer', 'centerbsControlCorner', 'map'], function(cm) {
-        var map = cm.get('map')
-        var config = cm.get('config');
-        var widgetsContainer = cm.get('widgetsContainer');
+    cm.define('sidebarWidget', ['centerbsControlCorner', 'widgetsContainer', 'resetter', 'config', 'map'], function(cm) {
         var centerbsControlCorner = cm.get('centerbsControlCorner');
+        var widgetsContainer = cm.get('widgetsContainer');
+        var resetter = cm.get('resetter');
+        var config = cm.get('config');
+        var map = cm.get('map')
+
         if (config.app.sidebarWidget && nsGmx.IconSidebarWidget) {
             var sidebarWidget = new nsGmx.IconSidebarWidget(config.app.sidebarWidget);
             sidebarWidget.appendTo(widgetsContainer);
@@ -646,12 +723,14 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     L.DomUtil.addClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.addClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
+                resetter.reset();
             });
             sidebarWidget.on('closing', function() {
                 if (nsGmx.Utils.isPhone() && map) {
                     L.DomUtil.removeClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.removeClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
+                resetter.reset();
             });
             sidebarWidget.on('stick', function(e) {
                 [
@@ -676,6 +755,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                         ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
                         centerbsControlCorner.fadeOut();
                     }
+                    resetter.reset();
                 });
             });
             return sidebarWidget;
@@ -866,8 +946,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return null;
         }
 
-        var calendarClass = config.app.calendarWidget.type === 'fire' ? 
-            nsGmx.FireCalendarWidget : 
+        var calendarClass = config.app.calendarWidget.type === 'fire' ?
+            nsGmx.FireCalendarWidget :
             nsGmx.CalendarWidget;
 
         var calendarWidget = new calendarClass(L.extend({
@@ -878,6 +958,75 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }, config.app.calendarWidget));
 
         return calendarWidget;
+    });
+
+    cm.define('mobilePopups', ['mapLayoutHelper', 'mapActiveArea', 'layersMapper', 'layersHash', 'resetter', 'map'], function(cm) {
+        var mapLayoutHelper = cm.get('mapLayoutHelper');
+        var mapActiveArea = cm.get('mapActiveArea');
+        var layersHash = cm.get('layersHash');
+        var resetter = cm.get('resetter');
+        var config = cm.get('config');
+        var map = cm.get('map');
+
+        if (!config.app.mobilePopups) {
+            return null;
+        }
+
+        var InfoControl = L.Control.extend({
+            includes: [nsGmx.GmxWidgetMixin],
+            initialize: function(options) {
+                L.setOptions(this, options);
+                this._container = L.DomUtil.create('div', 'infoControl');
+                this._terminateMouseEvents();
+                this.render(null);
+                this.hide();
+            },
+            render: function(html) {
+                this._container.innerHTML = html;
+                return this;
+            },
+            onAdd: function(map) {
+                return this._container;
+            }
+        });
+
+        var infoControl = new nsGmx.InfoControl({
+            position: 'center'
+        });
+
+        map.addControl(infoControl);
+
+        _.mapObject(layersHash, function(layer, layerId) {
+            unbindPopup(layer);
+            layer.on('click', function(ev) {
+                var style = layer.getStyle(ev.gmx.layer.getStylesByProperties([ev.gmx.id])[0]);
+                var balloonHtml = L.gmxUtil.parseBalloonTemplate(style.Balloon, {
+                    properties: ev.gmx.properties,
+                    tileAttributeTypes: layer._gmx.tileAttributeTypes
+                });
+                infoControl.render(balloonHtml);
+                infoControl.show();
+                mapActiveArea.setActiveArea({
+                    bottom: infoControl.getContainer().scrollHeight + 'px'
+                });
+                map.setView(ev.latlng);
+            });
+        });
+
+        resetter.on('reset', function() {
+            infoControl.hide();
+            mapActiveArea.resetActiveArea();
+        });
+
+        return null;
+
+        function unbindPopup(layer) {
+            var styles = layer.getStyles();
+            for (var i = 0; i < styles.length; i++) {
+                styles[i].DisableBalloonOnClick = true;
+            }
+            layer.setStyles(styles);
+        }
     });
 
     cm.define('globals', ['layersTree', 'layersHash', 'calendar', 'rawTree', 'config', 'map'], function() {
