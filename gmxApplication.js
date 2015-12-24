@@ -990,7 +990,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             }
         });
 
-        var infoControl = new nsGmx.InfoControl({
+        var infoControl = new InfoControl({
             position: 'center'
         });
 
