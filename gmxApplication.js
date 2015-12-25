@@ -518,14 +518,20 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('calendar', ['permalinkManager'], function(cm) {
+    cm.define('calendar', ['permalinkManager', 'config'], function(cm) {
         var permalinkManager = cm.get('permalinkManager');
+        var config = cm.get('config');
 
         if (!(window.Backbone && window.nsGmx && window.nsGmx.DateInterval)) {
             return false;
         }
 
         var cal = new nsGmx.DateInterval();
+        
+        if (config.app.calendarWidget && config.app.calendarWidget.type === 'fire' && nsGmx.FireCalendarWidget) {
+            cal.set(nsGmx.FireCalendarWidget.defaultFireDateInterval());
+        }
+
         permalinkManager && permalinkManager.setIdentity('calendar', cal);
 
         return cal;
