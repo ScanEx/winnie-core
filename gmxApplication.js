@@ -527,7 +527,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
 
         var cal = new nsGmx.DateInterval();
-        
+
         if (config.app.calendarWidget && config.app.calendarWidget.type === 'fire' && nsGmx.FireCalendarWidget) {
             cal.set(nsGmx.FireCalendarWidget.defaultFireDateInterval());
         }
@@ -1003,13 +1003,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         map.addControl(infoControl);
 
         _.mapObject(layersHash, function(layer, layerId) {
+            if (!layer.getStyles) {
+                return;
+            }
             unbindPopup(layer);
             layer.on('click', function(ev) {
-                var style = layer.getStyle(ev.gmx.layer.getStylesByProperties([ev.gmx.id])[0]);
-                var balloonHtml = L.gmxUtil.parseBalloonTemplate(style.Balloon, {
-                    properties: ev.gmx.properties,
-                    tileAttributeTypes: layer._gmx.tileAttributeTypes
-                });
+                var balloonHtml = layer.getItemBalloon(ev.gmx.id);
                 infoControl.render(balloonHtml);
                 infoControl.show();
                 mapActiveArea.setActiveArea({
