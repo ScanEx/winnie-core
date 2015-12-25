@@ -236,9 +236,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             },
             _getBottomControls: function() {
                 var bottomControls = [];
-                this.cm.get('bottomControl') && bottomControls.push(cm.get('bottomControl'));
-                this.cm.get('copyrightControl') && bottomControls.push(cm.get('copyrightControl'));
-                this.cm.get('logoControl') && bottomControls.push(cm.get('logoControl'));
+                this.cm.get('bottomControl') && bottomControls.push(this.cm.get('bottomControl'));
+                this.cm.get('copyrightControl') && bottomControls.push(this.cm.get('copyrightControl'));
+                this.cm.get('logoControl') && bottomControls.push(this.cm.get('logoControl'));
+                this.cm.get('locationControl') && bottomControls.push(this.cm.get('locationControl'));
+                this.cm.get('baseLayersControl') && bottomControls.push(this.cm.get('baseLayersControl'));
                 return bottomControls;
             }
         }))(cm);
@@ -979,6 +981,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
 
         var InfoControl = L.Control.extend({
+            options: {
+                maxHeight: 200
+            },
             includes: [nsGmx.GmxWidgetMixin],
             initialize: function(options) {
                 L.setOptions(this, options);
@@ -988,7 +993,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 this.hide();
             },
             render: function(html) {
+                $(this._container).removeClass('infoControl_overflow');
+                $(this._container).css('height', '');
                 this._container.innerHTML = html;
+                if ($(this._container).height() > this.options.maxHeight) {
+                    $(this._container).addClass('infoControl_overflow');
+                    $(this._container).height(this.options.maxHeight);
+                }
                 return this;
             },
             onAdd: function(map) {
@@ -997,8 +1008,13 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         });
 
         var infoControl = new InfoControl({
-            position: 'center'
+            position: 'center',
+            maxHeight: $(window).height() / 2
         });
+
+        var evBus = new(L.Class.extend({
+            includes: [L.Mixin.Events]
+        }))();
 
         map.addControl(infoControl);
 
@@ -1011,19 +1027,23 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 var balloonHtml = layer.getItemBalloon(ev.gmx.id);
                 infoControl.render(balloonHtml);
                 infoControl.show();
+                mapLayoutHelper.hideBottomControls();
                 mapActiveArea.setActiveArea({
                     bottom: infoControl.getContainer().scrollHeight + 'px'
                 });
                 map.setView(ev.latlng);
+                evBus.fire('shown');
             });
         });
 
         resetter.on('reset', function() {
             infoControl.hide();
+            mapLayoutHelper.showBottomControls();
             mapActiveArea.resetActiveArea();
+            evBus.fire('hidden');
         });
 
-        return null;
+        return evBus;
 
         function unbindPopup(layer) {
             var styles = layer.getStyles();
