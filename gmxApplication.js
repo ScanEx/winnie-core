@@ -958,6 +958,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             nsGmx.FireCalendarWidget :
             nsGmx.CalendarWidget;
 
+        if (!calendarClass) {
+            return false;
+        }
+
         var calendarWidget = new calendarClass(L.extend({
             dateInterval: calendar,
             container: calendarContainer.getCalendarPlaceholder()[0],
