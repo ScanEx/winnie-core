@@ -777,12 +777,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var layersTree = cm.get('layersTree');
         var config = cm.get('config');
 
-        if (!(nsGmx.LayersTreeWidget && layersTree && sidebarWidget)) {
-            return false;
-        }
-
         if (!config.app.layersTreeWidget) {
             return null;
+        }
+
+        if (!(nsGmx.LayersTreeWidget && layersTree && sidebarWidget)) {
+            return false;
         }
 
         var container = sidebarWidget.addTab('sidebarTab-layersTree', 'icon-layers');
