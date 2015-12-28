@@ -610,42 +610,54 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('layersClusters', ['config', 'layersHash'], function(cm) {
-        var config = cm.get('config');
+    cm.define('layersClusters', ['layersHash', 'resetter', 'config', 'map'], function(cm) {
         var layersHash = cm.get('layersHash');
+        var resetter = cm.get('resetter');
+        var config = cm.get('config');
+
         if (!config.layers) {
             return null;
         }
-        for (var layerId in config.layers) {
-            var layer = layersHash[layerId]
-            if (
-                config.layers.hasOwnProperty(layerId) &&
-                config.layers[layerId].clusters &&
-                layer
-            ) {
-                var opts = L.extend({
-                    zoomToBoundsOnClick: false,
-                    autoSpiderfy: true,
+
+        var layersClustersManager = new(L.Class.extend({
+            options: {
+                layersHash: {},
+                defaultClustersOptions: {
                     maxZoom: 30
-                }, config.layers[layerId].clusters);
-                if (opts.autoSpiderfy) {
-                    opts = L.extend(opts, {
-                        clusterclick: function(e) {
-                            var bounds = e.layer.getBounds();
-                            var nw = bounds.getNorthWest();
-                            var se = bounds.getSouthEast();
-                            if (nw.distanceTo(se) === 0) {
-                                e.layer.spiderfy();
-                            } else {
-                                e.layer.zoomToBounds();
-                            }
-                        }
-                    })
                 }
-                layer.bindClusters(opts);
+            },
+            initialize: function(options) {
+                L.setOptions(this, options);
+                _.mapObject(this.options.layersHash, function(layer, layerId) {
+                    layer.bindClusters(
+                        L.extend(
+                            this.options.defaultClustersOptions,
+                            this.options.layersConfig[layerId].clusters
+                        )
+                    );
+                }.bind(this));
+            },
+            reset: function() {
+                _.mapObject(this.options.layersHash, function(layer, layerId) {
+                    // TODO: don't use private properties
+                    layer._clusters && 
+                        layer._clusters.externalLayer && 
+                        layer._clusters.externalLayer._unspiderfy &&
+                        layer._clusters.externalLayer._unspiderfy()
+                }.bind(this));
             }
-        }
-        return null;
+        }))({
+            layersHash: _.pick(layersHash, _.keys(config.layers).filter(function(key) {
+                return config.layers[key].clusters
+            })),
+            layersConfig: cm.get('config').layers
+        });
+
+        resetter.on('reset', function() {
+            layersClustersManager.reset();
+        });
+
+        return layersClustersManager;
     });
 
     cm.define('layersHeatmaps', ['config', 'layersHash'], function(cm) {
