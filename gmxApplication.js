@@ -710,7 +710,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         function mapDate() {
             for (layer in layersHash) {
                 if (layersHash.hasOwnProperty(layer)) {
-                    layersHash[layer].setDateInterval(calendar.get('dateBegin'), calendar.get('dateEnd'));
+                    layersHash[layer].setDateInterval && layersHash[layer].setDateInterval(calendar.get('dateBegin'), calendar.get('dateEnd'));
                 }
             }
         }
