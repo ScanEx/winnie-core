@@ -179,7 +179,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
         var map = L.map(container[0] || container, opts);
 
-        map.on('click zoomstart dragend', function(le) {
+        map.on('click zoomstart', function(le) {
             resetter.reset();
         });
 
