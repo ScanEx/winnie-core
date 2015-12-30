@@ -636,11 +636,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                             this.options.layersConfig[layerId].clusters
                         )
                     );
-                    layer._clusters.externalLayer.on('spiderfied', function() {
-                        this.fire('spiderfied');
+                    layer._clusters.externalLayer.on('spiderfied', function(ev) {
+                        this.fire('spiderfied', ev);
                     }.bind(this));
-                    layer._clusters.externalLayer.on('unspiderfied', function() {
-                        this.fire('unspiderfied');
+                    layer._clusters.externalLayer.on('unspiderfied', function(ev) {
+                        this.fire('unspiderfied', ev);
                     }.bind(this));
                 }.bind(this));
             },
