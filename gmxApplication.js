@@ -620,6 +620,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
 
         var layersClustersManager = new(L.Class.extend({
+            includes: [L.Mixin.Events],
             options: {
                 layersHash: {},
                 defaultClustersOptions: {
@@ -635,6 +636,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                             this.options.layersConfig[layerId].clusters
                         )
                     );
+                    layer._clusters.externalLayer.on('spiderfied', function() {
+                        this.fire('spiderfied');
+                    }.bind(this));
+                    layer._clusters.externalLayer.on('unspiderfied', function() {
+                        this.fire('unspiderfied');
+                    }.bind(this));
                 }.bind(this));
             },
             reset: function() {
