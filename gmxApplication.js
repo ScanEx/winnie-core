@@ -912,10 +912,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('calendarContainer', ['widgetsContainerControl', 'hideControl', 'sidebarWidget', 'config'], function(cm) {
-        var config = cm.get('config');
-        var sidebarWidget = cm.get('sidebarWidget');
+    cm.define('calendarContainer', ['widgetsContainerControl', 'hideControl', 'sidebarWidget', 'resetter', 'config'], function(cm) {
         var widgetsContainerControl = cm.get('widgetsContainerControl');
+        var sidebarWidget = cm.get('sidebarWidget');
+        var hideControl = cm.get('hideControl');
+        var resetter = cm.get('resetter');
+        var config = cm.get('config');
 
         if (!config.app.calendarWidget) {
             return null;
@@ -936,6 +938,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 } else {
                     this.$el.addClass('calendarContainer_desktop');
                 }
+                this.$el.on('click', function() {
+                    this.trigger('click');
+                }.bind(this));
             },
             getCalendarPlaceholder: function() {
                 return this._calendarContainerCenterTableCell;
@@ -944,10 +949,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
         var calendarContainer = new CalendarContainer();
 
+        calendarContainer.on('click', function() {
+            resetter.reset();
+        });
+
         $(widgetsContainerControl.getContainer()).append(calendarContainer.getContainer());
         $(widgetsContainerControl.getContainer()).addClass('gmxApplication-widgetsContainer_withCalendar');
-
-        var hideControl = cm.get('hideControl');
 
         hideControl && hideControl.on('statechange', function(ev) {
             ev.target.options.isActive ? calendarContainer.show() : calendarContainer.hide();
