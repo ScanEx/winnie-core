@@ -912,11 +912,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('calendarContainer', ['widgetsContainerControl', 'hideControl', 'sidebarWidget', 'resetter', 'config'], function(cm) {
+    cm.define('calendarContainer', ['widgetsContainerControl', 'hideControl', 'sidebarWidget', 'config'], function(cm) {
         var widgetsContainerControl = cm.get('widgetsContainerControl');
         var sidebarWidget = cm.get('sidebarWidget');
         var hideControl = cm.get('hideControl');
-        var resetter = cm.get('resetter');
         var config = cm.get('config');
 
         if (!config.app.calendarWidget) {
@@ -949,10 +948,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
         var calendarContainer = new CalendarContainer();
 
-        calendarContainer.on('click', function() {
-            resetter.reset();
-        });
-
         $(widgetsContainerControl.getContainer()).append(calendarContainer.getContainer());
         $(widgetsContainerControl.getContainer()).addClass('gmxApplication-widgetsContainer_withCalendar');
 
@@ -971,10 +966,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return calendarContainer;
     });
 
-    cm.define('calendarWidget', ['calendar', 'calendarContainer', 'config'], function(cm) {
-        var config = cm.get('config');
-        var calendar = cm.get('calendar');
+    cm.define('calendarWidget', ['calendarContainer', 'calendar', 'resetter', 'config'], function(cm) {
         var calendarContainer = cm.get('calendarContainer');
+        var calendar = cm.get('calendar');
+        var resetter = cm.get('resetter');
+        var config = cm.get('config');
 
         if (!calendar || !calendarContainer || !config.app.calendarWidget) {
             return null;
@@ -994,6 +990,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             dateFormat: 'dd-mm-yy',
             dateMax: new Date()
         }, config.app.calendarWidget));
+        
+        resetter.on('reset', function() {
+            calendarWidget.reset();
+        });
 
         return calendarWidget;
     });
