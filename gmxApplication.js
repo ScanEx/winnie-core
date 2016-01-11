@@ -995,6 +995,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             calendarWidget.reset();
         });
 
+        calendarWidget.on('modechange', function() {
+            resetter.reset();
+        });
+
         return calendarWidget;
     });
 
