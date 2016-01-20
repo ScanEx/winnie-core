@@ -461,6 +461,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (!window.L.control.gmxBottom) {
             return false;
         }
+
+        $(container).addClass('gmxApplication_withBottomControls');
+
         if (opts) {
             var ctrl = L.control.gmxBottom(
                 (typeof opts === 'object') ? opts : {}
@@ -527,6 +530,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (!(window.Backbone && window.nsGmx && window.nsGmx.DateInterval)) {
             return false;
         }
+
+        $(container).addClass('gmxApplication_withCalendar');
 
         var cal = new nsGmx.DateInterval();
 
@@ -647,8 +652,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             reset: function() {
                 _.mapObject(this.options.layersHash, function(layer, layerId) {
                     // TODO: don't use private properties
-                    layer._clusters && 
-                        layer._clusters.externalLayer && 
+                    layer._clusters &&
+                        layer._clusters.externalLayer &&
                         layer._clusters.externalLayer._unspiderfy &&
                         layer._clusters.externalLayer._unspiderfy()
                 }.bind(this));
@@ -742,24 +747,27 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var config = cm.get('config');
         var map = cm.get('map')
 
-        if (config.app.sidebarWidget && nsGmx.IconSidebarWidget) {
-            var sidebarWidget = new nsGmx.IconSidebarWidget(config.app.sidebarWidget);
-            sidebarWidget.appendTo(widgetsContainer);
-            sidebarWidget.on('opening', function() {
+        if (config.app.sidebarWidget && nsGmx.IconSidebarControl) {
+            var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
+            sidebarControl.addTo(map);
+            sidebarControl.on('opening', function() {
                 if (nsGmx.Utils.isPhone() && map) {
                     L.DomUtil.addClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.addClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
                 resetter.reset();
             });
-            sidebarWidget.on('closing', function() {
+            sidebarControl.on('closing', function() {
                 if (nsGmx.Utils.isPhone() && map) {
                     L.DomUtil.removeClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
                     L.DomUtil.removeClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
                 }
                 resetter.reset();
             });
-            sidebarWidget.on('stick', function(e) {
+            if (nsGmx.Utils.isMobile()) {
+                sidebarControl.setMode('mobile');
+            }
+            sidebarControl.on('stick', function(e) {
                 [
                     cm.get('baseLayersControl'),
                     cm.get('logoControl'),
@@ -774,18 +782,18 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     map.attributionControl
                 ].map(function(ctrl) {
                     if (e.isStuck) {
-                        L.DomUtil.addClass(sidebarWidget.getContainer(), 'gmxApplication-noShadow');
+                        L.DomUtil.addClass(sidebarControl.getContainer(), 'gmxApplication-noShadow');
                         ctrl && L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
                         centerbsControlCorner.fadeIn();
                     } else {
-                        L.DomUtil.removeClass(sidebarWidget.getContainer(), 'gmxApplication-noShadow');
+                        L.DomUtil.removeClass(sidebarControl.getContainer(), 'gmxApplication-noShadow');
                         ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
                         centerbsControlCorner.fadeOut();
                     }
                     resetter.reset();
                 });
             });
-            return sidebarWidget;
+            return sidebarControl;
         } else {
             return null;
         }
@@ -990,7 +998,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             dateFormat: 'dd-mm-yy',
             dateMax: new Date()
         }, config.app.calendarWidget));
-        
+
         resetter.on('reset', function() {
             calendarWidget.reset();
         });

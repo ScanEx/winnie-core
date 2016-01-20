@@ -24,7 +24,8 @@
 .calendarContainer-centerTableCell { display: table-cell; vertical-align: middle; }
 
 .gmxApplication-widgetsContainer_mobileSidebarOpened .calendarContainer { box-shadow: none; }
-.gmxApplication-widgetsContainer_withCalendar .iconSidebarWidget { top: 65px; border-radius: 2px; }
+.gmxApplication_withCalendar .iconSidebarControl-controlCorner { top: 65px; }
+.gmxApplication_withBottomControls .iconSidebarControl-controlCorner { bottom: 20px; }
 
 .gmxApplication-noShadow.calendarContainer { box-shadow: none; }
 
