@@ -177,7 +177,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             opts.attributionControl = true;
         }
 
-        L.DomUtil.addClass(container, 'gmxApplication');
+        L.DomUtil.addClass(container[0] || container, 'gmxApplication');
 
         var map = L.map(container[0] || container, opts);
 
@@ -998,6 +998,16 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             includes: [L.Mixin.Events]
         }))();
 
+        var popupIsActive = false;
+
+        evBus.on('shown', function() {
+            popupIsActive = true;
+        });
+
+        evBus.on('hidden', function() {
+            popupIsActive = false;
+        });
+
         map.addControl(infoControl);
 
         _.mapObject(layersHash, function(layer, layerId) {
@@ -1019,9 +1029,11 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         });
 
         resetter.on('reset', function() {
-            infoControl.hide();
-            mapLayoutHelper.showBottomControls();
-            mapActiveArea.resetActiveArea();
+            if (popupIsActive) {
+                infoControl.hide();
+                mapLayoutHelper.showBottomControls();
+                mapActiveArea.resetActiveArea();
+            }
             evBus.fire('hidden');
         });
 
