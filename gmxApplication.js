@@ -246,26 +246,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }))(cm);
     });
 
-    cm.define('centerbsControlCorner', ['map'], function(cm) {
-        var map = cm.get('map');
-        var el = L.DomUtil.create('div', 'leaflet-top leaflet-bottom leaflet-left leaflet-right gmx-bottom-shift', map._controlContainer);
-        L.DomUtil.addClass(el, L.Browser.ie ? 'gmxApplication-centerbsControlCorner-ie9' : 'gmxApplication-centerbsControlCorner');
-        map._controlCorners['centerbs'] = el;
-        return {
-            fadeIn: function() {
-                L.DomUtil.removeClass(el, 'gmx-bottom-shift');
-                L.DomUtil.addClass(el, 'gmxApplication-centerbsControlCorner-fadeIn');
-            },
-            fadeOut: function() {
-                L.DomUtil.addClass(el, 'gmx-bottom-shift');
-                L.DomUtil.removeClass(el, 'gmxApplication-centerbsControlCorner-fadeIn');
-            },
-            getContainer: function() {
-                return el;
-            }
-        }
-    });
-
     cm.define('mapSerializer', ['map', 'permalinkManager'], function(cm) {
         var map = cm.get('map');
         var permalinkManager = cm.get('permalinkManager');
@@ -287,28 +267,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         permalinkManager && permalinkManager.setIdentity('map', serializer);
 
         return serializer;
-    });
-
-    cm.define('widgetsContainerControl', ['map', 'centerbsControlCorner'], function(cm) {
-        var map = cm.get('map');
-
-        var WidgetsContainer = L.Control.extend({
-            options: {
-                position: 'centerbs'
-            },
-            onAdd: function() {
-                this._container = L.DomUtil.create('div', 'gmxApplication-widgetsContainer');
-                return this._container;
-            }
-        });
-
-        var widgetsContainer = new WidgetsContainer();
-        widgetsContainer.addTo(map);
-        return widgetsContainer;
-    });
-
-    cm.define('widgetsContainer', ['widgetsContainerControl'], function(cm) {
-        return cm.get('widgetsContainerControl').getContainer();
     });
 
     cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
@@ -523,6 +481,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
+    // DateInterval model
     cm.define('calendar', ['permalinkManager', 'config'], function(cm) {
         var permalinkManager = cm.get('permalinkManager');
         var config = cm.get('config');
@@ -542,6 +501,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         return cal;
     });
 
+    // LayersTreeNode model
     cm.define('layersTree', ['rawTree', 'permalinkManager'], function(cm) {
         var rawTree = cm.get('rawTree');
         var permalinkManager = cm.get('permalinkManager');
@@ -738,9 +698,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('sidebarWidget', ['centerbsControlCorner', 'widgetsContainer', 'resetter', 'config', 'map'], function(cm) {
-        var centerbsControlCorner = cm.get('centerbsControlCorner');
-        var widgetsContainer = cm.get('widgetsContainer');
+    cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
         var resetter = cm.get('resetter');
         var config = cm.get('config');
         var map = cm.get('map')
@@ -749,17 +707,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
             sidebarControl.addTo(map);
             sidebarControl.on('opening', function() {
-                if (nsGmx.Utils.isPhone() && map) {
-                    L.DomUtil.addClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
-                    L.DomUtil.addClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
-                }
                 resetter.reset();
             });
             sidebarControl.on('closing', function() {
-                if (nsGmx.Utils.isPhone() && map) {
-                    L.DomUtil.removeClass(widgetsContainer, 'gmxApplication-widgetsContainer_mobileSidebarOpened');
-                    L.DomUtil.removeClass(map.getContainer(), 'gmxApplication-mapContainer_hidden');
-                }
                 resetter.reset();
             });
             if (nsGmx.Utils.isMobile()) {
@@ -782,11 +732,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     if (e.isStuck) {
                         L.DomUtil.addClass(sidebarControl.getContainer(), 'gmxApplication-noShadow');
                         ctrl && L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
-                        centerbsControlCorner.fadeIn();
                     } else {
                         L.DomUtil.removeClass(sidebarControl.getContainer(), 'gmxApplication-noShadow');
                         ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
-                        centerbsControlCorner.fadeOut();
                     }
                     resetter.reset();
                 });
@@ -898,36 +846,36 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('storytellingWidget', ['widgetsContainer', 'permalinkManager', 'calendar', 'rawTree', 'config', 'map'], function(cm) {
-        var widgetsContainer = cm.get('widgetsContainer');
-        var permalinkManager = cm.get('permalinkManager');
-        var calendar = cm.get('calendar');
-        var rawTree = cm.get('rawTree');
-        var config = cm.get('config');
-        var map = cm.get('map');
+    // cm.define('storytellingWidget', ['widgetsContainer', 'permalinkManager', 'calendar', 'rawTree', 'config', 'map'], function(cm) {
+    //     var widgetsContainer = cm.get('widgetsContainer');
+    //     var permalinkManager = cm.get('permalinkManager');
+    //     var calendar = cm.get('calendar');
+    //     var rawTree = cm.get('rawTree');
+    //     var config = cm.get('config');
+    //     var map = cm.get('map');
 
-        if (config.app.storytellingWidget) {
-            var storytellingWidget = new nsGmx.StorytellingWidget({
-                bookmarks: JSON.parse(rawTree.properties.UserData).tabs
-            });
+    //     if (config.app.storytellingWidget) {
+    //         var storytellingWidget = new nsGmx.StorytellingWidget({
+    //             bookmarks: JSON.parse(rawTree.properties.UserData).tabs
+    //         });
 
-            storytellingWidget.appendTo(widgetsContainer);
+    //         storytellingWidget.appendTo(widgetsContainer);
 
-            storytellingWidget.on('storyChanged', function(story) {
-                permalinkManager && permalinkManager.loadFromData(story.state)
-            });
+    //         storytellingWidget.on('storyChanged', function(story) {
+    //             permalinkManager && permalinkManager.loadFromData(story.state)
+    //         });
 
-            return storytellingWidget;
-        } else {
-            return null;
-        }
-    });
+    //         return storytellingWidget;
+    //     } else {
+    //         return null;
+    //     }
+    // });
 
-    cm.define('calendarContainer', ['widgetsContainerControl', 'hideControl', 'sidebarWidget', 'config'], function(cm) {
-        var widgetsContainerControl = cm.get('widgetsContainerControl');
+    cm.define('calendarContainer', ['hideControl', 'sidebarWidget', 'config', 'map'], function(cm) {
         var sidebarWidget = cm.get('sidebarWidget');
         var hideControl = cm.get('hideControl');
         var config = cm.get('config');
+        var map = cm.get('map');
 
         if (!config.app.calendarWidget) {
             return null;
@@ -937,30 +885,31 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return false;
         }
 
-        var CalendarContainer = nsGmx.GmxWidget.extend({
-            className: 'calendarContainer',
-            initialize: function() {
+        var CalendarContainer = L.Control.extend({
+            includes: [nsGmx.GmxWidgetMixin, L.Mixin.Events],
+            onAdd: function(map) {
+                var container = this._container = L.DomUtil.create('div', 'calendarContainer');
                 this._terminateMouseEvents();
-                var $calendarContainerCenterTable = $('<div>').addClass('calendarContainer-centerTable').appendTo(this.$el);
-                this._calendarContainerCenterTableCell = $('<div>').addClass('calendarContainer-centerTableCell').appendTo($calendarContainerCenterTable);
+
                 if (nsGmx.Utils.isMobile()) {
-                    this.$el.addClass('calendarContainer_mobile');
+                    L.DomUtil.addClass(container, 'calendarContainer_mobile');
                 } else {
-                    this.$el.addClass('calendarContainer_desktop');
+                    L.DomUtil.addClass(container, 'calendarContainer_desktop');
                 }
-                this.$el.on('click', function() {
-                    this.trigger('click');
-                }.bind(this));
-            },
-            getCalendarPlaceholder: function() {
-                return this._calendarContainerCenterTableCell;
+
+                L.DomEvent.addListener(container, 'click', function() {
+                    this.fire('click');
+                }, this);
+
+                return container;
             }
         });
 
-        var calendarContainer = new CalendarContainer();
+        var calendarContainer = new CalendarContainer({
+            position: 'topright'
+        });
 
-        $(widgetsContainerControl.getContainer()).append(calendarContainer.getContainer());
-        $(widgetsContainerControl.getContainer()).addClass('gmxApplication-widgetsContainer_withCalendar');
+        map.addControl(calendarContainer);
 
         hideControl && hideControl.on('statechange', function(ev) {
             ev.target.options.isActive ? calendarContainer.show() : calendarContainer.hide();
@@ -999,7 +948,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
         var calendarWidget = new calendarClass(L.extend({
             dateInterval: calendar,
-            container: calendarContainer.getCalendarPlaceholder()[0],
+            container: calendarContainer.getContainer(),
             dateFormat: 'dd-mm-yy',
             dateMax: new Date()
         }, config.app.calendarWidget));
