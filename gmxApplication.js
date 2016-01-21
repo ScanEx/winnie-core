@@ -531,8 +531,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             return false;
         }
 
-        $(container).addClass('gmxApplication_withCalendar');
-
         var cal = new nsGmx.DateInterval();
 
         if (config.app.calendarWidget && config.app.calendarWidget.type === 'fire' && nsGmx.FireCalendarWidget) {
@@ -996,6 +994,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (!calendarClass) {
             return false;
         }
+
+        $(container).addClass('gmxApplication_withCalendar');
 
         var calendarWidget = new calendarClass(L.extend({
             dateInterval: calendar,
