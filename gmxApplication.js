@@ -846,30 +846,28 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    // cm.define('storytellingWidget', ['widgetsContainer', 'permalinkManager', 'calendar', 'rawTree', 'config', 'map'], function(cm) {
-    //     var widgetsContainer = cm.get('widgetsContainer');
-    //     var permalinkManager = cm.get('permalinkManager');
-    //     var calendar = cm.get('calendar');
-    //     var rawTree = cm.get('rawTree');
-    //     var config = cm.get('config');
-    //     var map = cm.get('map');
+    cm.define('storytellingWidget', ['permalinkManager', 'rawTree', 'config', 'map'], function(cm) {
+        var permalinkManager = cm.get('permalinkManager');
+        var rawTree = cm.get('rawTree');
+        var config = cm.get('config');
+        var map = cm.get('map');
 
-    //     if (config.app.storytellingWidget) {
-    //         var storytellingWidget = new nsGmx.StorytellingWidget({
-    //             bookmarks: JSON.parse(rawTree.properties.UserData).tabs
-    //         });
+        if (config.app.storytellingWidget) {
+            var storytellingControl = new nsGmx.StorytellingControl({
+                bookmarks: JSON.parse(rawTree.properties.UserData).tabs
+            });
 
-    //         storytellingWidget.appendTo(widgetsContainer);
+            map.addControl(storytellingControl);
 
-    //         storytellingWidget.on('storyChanged', function(story) {
-    //             permalinkManager && permalinkManager.loadFromData(story.state)
-    //         });
+            storytellingControl.on('storyChanged', function(story) {
+                permalinkManager && permalinkManager.loadFromData(story.state)
+            });
 
-    //         return storytellingWidget;
-    //     } else {
-    //         return null;
-    //     }
-    // });
+            return storytellingControl;
+        } else {
+            return null;
+        }
+    });
 
     cm.define('calendarContainer', ['hideControl', 'sidebarWidget', 'config', 'map'], function(cm) {
         var sidebarWidget = cm.get('sidebarWidget');
