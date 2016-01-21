@@ -177,6 +177,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             opts.attributionControl = true;
         }
 
+        L.DomUtil.addClass(container, 'gmxApplication');
+
         var map = L.map(container[0] || container, opts);
 
         map.on('click zoomstart', function(le) {
@@ -730,10 +732,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                     map.attributionControl
                 ].map(function(ctrl) {
                     if (e.isStuck) {
-                        L.DomUtil.addClass(sidebarControl.getContainer(), 'gmxApplication-noShadow');
                         ctrl && L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
                     } else {
-                        L.DomUtil.removeClass(sidebarControl.getContainer(), 'gmxApplication-noShadow');
                         ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
                     }
                     resetter.reset();
@@ -913,14 +913,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
         hideControl && hideControl.on('statechange', function(ev) {
             ev.target.options.isActive ? calendarContainer.show() : calendarContainer.hide();
-        });
-
-        sidebarWidget && sidebarWidget.on('stick', function(e) {
-            if (e.isStuck) {
-                $(calendarContainer.getContainer()).addClass('gmxApplication-noShadow');
-            } else {
-                $(calendarContainer.getContainer()).removeClass('gmxApplication-noShadow');
-            }
         });
 
         return calendarContainer;
