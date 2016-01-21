@@ -799,9 +799,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('layersTreeWidget', ['sidebarWidget', 'layersTree', 'config'], function(cm) {
+    cm.define('layersTreeWidget', ['sidebarWidget', 'layersTree', 'resetter', 'config'], function(cm) {
         var sidebarWidget = cm.get('sidebarWidget');
         var layersTree = cm.get('layersTree');
+        var resetter = cm.get('resetter');
         var config = cm.get('config');
 
         if (!config.app.layersTreeWidget) {
@@ -819,6 +820,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }, config.app.layersTreeWidget, {
             layersTree: layersTree
         }));
+
+        resetter.on('reset', function() {
+            layersTreeWidget.reset();
+        });
 
         if (nsGmx.ScrollView) {
             var scrollView = new nsGmx.ScrollView({
