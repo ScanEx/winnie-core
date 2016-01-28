@@ -694,7 +694,8 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         function mapDate() {
             for (layer in layersHash) {
                 if (layersHash.hasOwnProperty(layer)) {
-                    layersHash[layer].setDateInterval && layersHash[layer].setDateInterval(calendar.get('dateBegin'), calendar.get('dateEnd'));
+                    layersHash[layer].setDateInterval && layersHash[layer].setDateInterval(calendar.get('dateBegin'), calendar.get(
+                        'dateEnd'));
                 }
             }
         }
@@ -853,15 +854,19 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var map = cm.get('map');
 
         if (config.app.storytellingWidget) {
-            var storytellingControl = new nsGmx.StorytellingControl({
+            var StorytellingControlClass = config.app.storytellingWidget.type === 'accordeon' ?
+                nsGmx.StorytellingAccordeonControl :
+                nsGmx.StorytellingControl;
+
+            var storytellingControl = new StorytellingControlClass({
                 bookmarks: JSON.parse(rawTree.properties.UserData).tabs
             });
-
-            map.addControl(storytellingControl);
 
             storytellingControl.on('storyChanged', function(story) {
                 permalinkManager && permalinkManager.loadFromData(story.state)
             });
+
+            map.addControl(storytellingControl);
 
             return storytellingControl;
         } else {
