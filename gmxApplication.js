@@ -858,9 +858,9 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 nsGmx.StorytellingAccordeonControl :
                 nsGmx.StorytellingControl;
 
-            var storytellingControl = new StorytellingControlClass({
+            var storytellingControl = new StorytellingControlClass(L.extend(config.app.storytellingWidget, {
                 bookmarks: rawTree.properties.UserData && JSON.parse(rawTree.properties.UserData).tabs
-            });
+            }));
 
             storytellingControl.on('storyChanged', function(story) {
                 permalinkManager && permalinkManager.loadFromData(story.state)
