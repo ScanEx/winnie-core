@@ -811,7 +811,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (config.app.bookmarksWidget && nsGmx.BookmarksWidget && rawTree && sidebar) {
             var container = sidebar.addTab('sidebarTab-bookmarksWidget', 'icon-bookmark');
             var bookmarksWidget = new nsGmx.BookmarksWidget({
-                collection: new Backbone.Collection(JSON.parse(rawTree.properties.UserData).tabs)
+                collection: new Backbone.Collection(JSON.parse(rawTree.properties.UserData && rawTree.properties.UserData).tabs)
             });
 
             bookmarksWidget.on('selected', function(model) {
@@ -859,7 +859,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
                 nsGmx.StorytellingControl;
 
             var storytellingControl = new StorytellingControlClass({
-                bookmarks: JSON.parse(rawTree.properties.UserData).tabs
+                bookmarks: rawTree.properties.UserData && JSON.parse(rawTree.properties.UserData).tabs
             });
 
             storytellingControl.on('storyChanged', function(story) {
