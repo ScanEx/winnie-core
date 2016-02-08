@@ -339,6 +339,17 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         });
     });
 
+    cm.define('drawingManager', ['permalinkManager', 'map'], function (cm, cb) {
+        var permalinkManager = cm.get('permalinkManager');
+        var map = cm.get('map');
+
+        var drawingManager = map.gmxDrawing;
+
+        permalinkManager && permalinkManager.setIdentity('drawingManager', drawingManager);
+
+        return drawingManager;
+    });
+
     cm.define('baseLayersControl', ['baseLayersManager', 'config', 'i18n', 'map'], function(cm, cb) {
         var baseLayersManager = cm.get('baseLayersManager');
         var config = cm.get('config');
