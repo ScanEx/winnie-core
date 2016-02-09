@@ -345,6 +345,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
 
         var drawingManager = map.gmxDrawing;
 
+        if (!drawingManager) {
+            return null;
+        }
+
         permalinkManager && permalinkManager.setIdentity('drawingManager', drawingManager);
 
         return drawingManager;
