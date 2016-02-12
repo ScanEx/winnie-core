@@ -759,11 +759,12 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('layersTreeWidget', ['sidebarWidget', 'layersTree', 'resetter', 'config'], function(cm) {
+    cm.define('layersTreeWidget', ['sidebarWidget', 'layersTree', 'resetter', 'config', 'map'], function(cm) {
         var sidebarWidget = cm.get('sidebarWidget');
         var layersTree = cm.get('layersTree');
         var resetter = cm.get('resetter');
         var config = cm.get('config');
+        var map = cm.get('map');
 
         if (!config.app.layersTreeWidget) {
             return null;
@@ -780,6 +781,10 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }, config.app.layersTreeWidget, {
             layersTree: layersTree
         }));
+
+        layersTreeWidget.on('centerLayer', function (model) {
+            map.fitBounds(model.getLatLngBounds());
+        })
 
         resetter.on('reset', function() {
             layersTreeWidget.reset();
