@@ -325,9 +325,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         var rawTree = cm.get('rawTree');
         var permalinkManager = cm.get('permalinkManager');
 
-        var baseLayers = rawTree.properties.BaseLayers.trim().slice(1, -1).split(',').map(function(e) {
-            return e.trim().slice(1, -1)
-        });
+        var baseLayers = JSON.parse(rawTree.properties.BaseLayers);
         if (!map.gmxBaseLayersManager) {
             L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
             return false;
