@@ -21,3 +21,18 @@
 .infoControl_overflow { overflow: scroll; }
 
 .gmxApplication .iconSidebarControl-controlCorner_locked { pointer-events: auto; background-color: hsla(0, 0%, 100%, 0.65); }
+
+.debugWindowControl {
+    position: absolute;
+    background: hsla(0, 0%, 0%, 0.8);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #fff;
+    padding: 4px 8px;
+    display: none;
+}
+.debugWindowControl-controlCorner { z-index: 9999; }
+.debugWindowControl_active { display: block; }
