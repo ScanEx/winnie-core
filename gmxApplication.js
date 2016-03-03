@@ -164,7 +164,17 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         }
     });
 
-    cm.define('map', ['permalinkManager', 'resetter', 'config'], function(cm, cb) {
+    cm.define('container', [], function(cm) {
+        var containerEl = container[0] || container;
+        L.DomUtil.addClass(containerEl, 'gmxApplication');
+        if (window.device && window.device.platform) {
+            L.DomUtil.addClass(containerEl, 'gmxApplication_platform-' + window.device.platform.toLowerCase());
+        }
+        return containerEl;
+    });
+
+    cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], function(cm, cb) {
+        var container = cm.get('container');
         var resetter = cm.get('resetter');
         var config = cm.get('config');
         var opts = config.app.map;
@@ -176,8 +186,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         if (config.app.copyrightControl === 'leaflet') {
             opts.attributionControl = true;
         }
-
-        L.DomUtil.addClass(container[0] || container, 'gmxApplication');
 
         var map = L.map(container[0] || container, opts);
 
@@ -337,7 +345,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         });
     });
 
-    cm.define('drawingManager', ['permalinkManager', 'map'], function (cm, cb) {
+    cm.define('drawingManager', ['permalinkManager', 'map'], function(cm, cb) {
         var permalinkManager = cm.get('permalinkManager');
         var map = cm.get('map');
 
@@ -782,7 +790,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             layersTree: layersTree
         }));
 
-        layersTreeWidget.on('centerLayer', function (model) {
+        layersTreeWidget.on('centerLayer', function(model) {
             map.fitBounds(model.getLatLngBounds());
         })
 

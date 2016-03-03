@@ -36,3 +36,5 @@
 }
 .debugWindowControl-controlCorner { z-index: 9999; }
 .debugWindowControl_active { display: block; }
+
+.gmxApplication_platform-ios .leaflet-top .leaflet-control { margin-top: 25px; }
