@@ -259,6 +259,7 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     cm.define('mapSerializer', ['map', 'permalinkManager'], function(cm) {
         var map = cm.get('map');
         var permalinkManager = cm.get('permalinkManager');
+
         var serializer = {};
         serializer.saveState = function() {
             return {
@@ -271,10 +272,33 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
             };
         };
         serializer.loadState = function(data) {
-            map.setView([data.position.y, data.position.x], data.position.z);
+            map.setView([data.position.y, data.position.x], data.position.z, {
+                animate: false
+            });
         };
 
         permalinkManager && permalinkManager.setIdentity('map', serializer);
+
+        return serializer;
+    });
+
+    cm.define('balloonsSerializer', ['permalinkManager', 'layersHash', 'map'], function(cm) {
+        var permalinkManager = cm.get('permalinkManager');
+        var layersHash = cm.get('layersHash');
+        var map = cm.get('map');
+
+        var serializer = {};
+        serializer.saveState = function() {};
+        serializer.loadState = function(data) {
+            for (var l in data) {
+                var layer = layersHash[l];
+                if (layer && layer.addPopup) {
+                    data[l].forEach(layer.addPopup.bind(layer));
+                }
+            }
+        };
+
+        permalinkManager && permalinkManager.setIdentity('balloons', serializer);
 
         return serializer;
     });
