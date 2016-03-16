@@ -1,0 +1,22 @@
+{
+  "name": "winnie-core",
+  "version": "0.0.1",
+  "description": "",
+  "main": "gmxApplication.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kosmosnimki/winnie-core.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kosmosnimki/winnie-core/issues"
+  },
+  "homepage": "https://github.com/Kosmosnimki/winnie-core#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
+}
