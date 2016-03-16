@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="dist/bundle.js" charset="utf-8"></script>
+        <title></title>
+    </head>
+    <body>
+        <script type="text/javascript">
+            var cm = nsGmx.createGmxApplication(document.body, {
+                gmxMap: {
+                    mapID: '37TYY'
+                }
+            });
+            cm.create().then(function () {
+                window.cm = cm;
+                console.log('ready');
+            });
+        </script>
+    </body>
+</html>

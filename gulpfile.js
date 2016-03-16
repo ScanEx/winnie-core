@@ -1,6 +1,6 @@
-var gulp = require('gulp');
-
-gulp.task('default', function () {
-    return gulp.src(['gmxApplication.js', 'gmxApplication.css'])
-        .pipe(gulp.dest('dist'));
+require('gmx-builder')(require('gulp'), {
+    // debug: true,
+    bundles: {
+        'dist/bundle.js': 'index.js'
+    }
 });

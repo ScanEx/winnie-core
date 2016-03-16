@@ -1,8 +1,8 @@
 {
   "name": "winnie-core",
   "version": "0.0.1",
-  "description": "",
-  "main": "gmxApplication.js",
+  "description": "gmx application constructor core files",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,7 +16,12 @@
     "url": "https://github.com/Kosmosnimki/winnie-core/issues"
   },
   "homepage": "https://github.com/Kosmosnimki/winnie-core#readme",
+  "dependencies": {
+    "gmx-common-components": "github:scanex/GMXCommonComponents#browserify",
+    "jquery": "^2.2.1"
+  },
   "devDependencies": {
+    "gmx-builder": "github:zverev/builderV2",
     "gulp": "^3.9.1"
   }
 }
