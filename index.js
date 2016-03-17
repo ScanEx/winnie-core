@@ -6,6 +6,7 @@ function createApplication(container, config) {
     require('./src/core.js')(cm, container, config);
     require('./src/map.js')(cm);
     require('./src/layers.js')(cm);
+    require('./src/controls.js')(cm);
     require('./src/commonWidgets.js')(cm);
     require('./src/mobileWidgets.js')(cm);
     require('./src/desktopWidgets.js')(cm);

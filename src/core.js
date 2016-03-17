@@ -1,5 +1,8 @@
 var $ = require('jquery');
 
+window.L = require('leaflet');
+require('leaflet-tilelayer-mercator');
+
 function setConfigDefaults(config) {
     var configConditions = function(config) {
         if (config.app.layersTreeWidget || config.app.bookmarksWidget) {
@@ -78,5 +81,83 @@ module.exports = function(cm, container, applicationConfig) {
             console.error('invalid config argument');
             cb(false);
         }
+    });
+
+    cm.define('container', [], function(cm) {
+        var L = require('leaflet');
+
+        var containerEl = container[0] || container;
+        L.DomUtil.addClass(containerEl, 'gmxApplication');
+        if (window.device && window.device.platform) {
+            L.DomUtil.addClass(containerEl, 'gmxApplication_platform-' + window.device.platform.toLowerCase());
+        }
+        return containerEl;
+    });
+
+    cm.define('resetter', [], function(cm) {
+        var L = require('leaflet');
+
+        return new(L.Class.extend({
+            includes: [L.Mixin.Events],
+            initialize: function() {},
+            reset: function() {
+                this.fire('reset');
+            }
+        }));
+    });
+
+    cm.define('mapsResourceServer', [], function(cm) {
+        // if (nsGmx.Auth && nsGmx.Auth.Server) {
+        //     return new nsGmx.Auth.Server({
+        //         root: 'http://maps.kosmosnimki.ru'
+        //     });
+        // } else {
+        //     return null;
+        // }
+        return null;
+    });
+
+    cm.define('permalinkManager', ['mapsResourceServer', 'config'], function(cm, cb) {
+        // var PermalinkManager = require('gmx-common-components/PermalinkManager');
+        //
+        // var mapsResourceServer = cm.get('mapsResourceServer');
+        // var config = cm.get('config');
+        //
+        // if (!config.app.permalinkManager) {
+        //     return null;
+        // }
+        //
+        // if (nsGmx.PermalinkManager && mapsResourceServer) {
+        //     var permalinkManager = new nsGmx.PermalinkManager({
+        //         provider: mapsResourceServer
+        //     });
+        //     var permalinkId = config.app.permalinkManager.permalinkId;
+        //     if (permalinkId) {
+        //         permalinkManager.loadFromId(permalinkId).then(function() {
+        //             cb(permalinkManager);
+        //         }, function() {
+        //             console.warn('failed to load permalink ' + permalinkId);
+        //             cb(permalinkManager);
+        //         });
+        //     } else if (config.state) {
+        //         permalinkManager.loadFromData({
+        //             version: '3.0.0',
+        //             components: config.state
+        //         });
+        //         return permalinkManager;
+        //     } else {
+        //         return permalinkManager;
+        //     }
+        // } else if (nsGmx.StateManager) {
+        //     var permalinkManager = new nsGmx.StateManager();
+        //     permalinkManager.loadFromData({
+        //         version: '3.0.0',
+        //         components: config.state
+        //     });
+        //     return permalinkManager;
+        // } else {
+        //     return null;
+        // }
+        return null;
     });
 }

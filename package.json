@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "description": "gmx application constructor core files",
   "main": "index.js",
+  "style": [
+    "./node_modules/leaflet/dist/leaflet.css",
+    "./gmxApplication.css"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,8 +21,11 @@
   },
   "homepage": "https://github.com/Kosmosnimki/winnie-core#readme",
   "dependencies": {
+    "gmx-base-layers-manager": "github:scanex/Leaflet.gmxBaseLayersManager",
     "gmx-common-components": "github:scanex/GMXCommonComponents#browserify",
-    "jquery": "^2.2.1"
+    "jquery": "^2.2.1",
+    "leaflet-geomixer": "github:scanex/Leaflet-GeoMixer",
+    "leaflet-tilelayer-mercator": "github:scanex/Leaflet.TileLayer.Mercator"
   },
   "devDependencies": {
     "gmx-builder": "github:zverev/builderV2",
