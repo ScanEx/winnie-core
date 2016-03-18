@@ -1,8 +1,5 @@
 var $ = require('jquery');
 
-window.L = require('leaflet');
-require('leaflet-tilelayer-mercator');
-
 function setConfigDefaults(config) {
     var configConditions = function(config) {
         if (config.app.layersTreeWidget || config.app.bookmarksWidget) {
@@ -92,6 +89,21 @@ module.exports = function(cm, container, applicationConfig) {
             L.DomUtil.addClass(containerEl, 'gmxApplication_platform-' + window.device.platform.toLowerCase());
         }
         return containerEl;
+    });
+
+    cm.define('i18n', ['config'], function(cm) {
+        var config = cm.get('config');
+
+        if (!(config.app.i18n && nsGmx.Translations)) {
+            return false;
+        }
+
+        var lang = config.state.language || config.app.i18n.language || (nsGmx.Translations && nsGmx.Translations.getLanguage());
+        if (lang) {
+            L.gmxLocale && L.gmxLocale.setLanguage(lang);
+            nsGmx.Translations && nsGmx.Translations.setLanguage(lang);
+        }
+        return nsGmx.Translations;
     });
 
     cm.define('resetter', [], function(cm) {

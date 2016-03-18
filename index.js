@@ -1,5 +1,13 @@
 var ComponentsManager = require('gmx-common-components/ComponentsManager/componentsManager.js').ComponentsManager;
 
+window.L = require('leaflet');
+require('leaflet-tilelayer-mercator');
+
+window.$ = window.jQuery = require('jquery');
+require('gmx-common-components/Popover');
+
+require('gmx-common-components/Translations');
+
 function createApplication(container, config) {
     var cm = new ComponentsManager();
 

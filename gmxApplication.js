@@ -4,21 +4,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
     var ComponentsManager = window.cm.ComponentsManager;
     var cm = new ComponentsManager();
 
-    cm.define('i18n', ['config'], function(cm) {
-        var config = cm.get('config');
-
-        if (!(config.app.i18n && nsGmx.Translations)) {
-            return false;
-        }
-
-        var lang = config.state.language || config.app.i18n.language || (nsGmx.Translations && nsGmx.Translations.getLanguage());
-        if (lang) {
-            L.gmxLocale && L.gmxLocale.setLanguage(lang);
-            nsGmx.Translations && nsGmx.Translations.setLanguage(lang);
-        }
-        return nsGmx.Translations;
-    });
-
     cm.define('mapActiveArea', ['map'], function(cm) {
         if (!cm.get('map').setActiveArea) {
             return false;
@@ -135,23 +120,6 @@ nsGmx.createGmxApplication = function(container, applicationConfig) {
         permalinkManager && permalinkManager.setIdentity('drawingManager', drawingManager);
 
         return drawingManager;
-    });
-
-    cm.define('baseLayersControl', ['baseLayersManager', 'config', 'i18n', 'map'], function(cm, cb) {
-        var baseLayersManager = cm.get('baseLayersManager');
-        var config = cm.get('config');
-        var i18n = cm.get('i18n');
-        var map = cm.get('map');
-
-        if (config.app.baseLayersControl && L.Control.GmxIconLayers) {
-            var ctrl = new L.Control.GmxIconLayers(baseLayersManager, L.extend(config.app.baseLayersControl, {
-                language: i18n.getLanguage()
-            }));
-            map.addControl(ctrl);
-            return ctrl;
-        } else {
-            return null;
-        }
     });
 
     cm.define('logoControl', ['map', 'config', 'i18n'], function(cm) {
