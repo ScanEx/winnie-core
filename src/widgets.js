@@ -5,7 +5,7 @@ cm.define('layersTreeWidget', ['layersTreeWidgetContainer', 'layersTree', 'reset
     var config = cm.get('config');
     var map = cm.get('map');
 
-    if (!layersTreeWidgetContainer) {
+    if (!layersTreeWidgetContainer || !layersTree) {
         return null;
     }
 

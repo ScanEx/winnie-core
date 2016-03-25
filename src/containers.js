@@ -110,7 +110,7 @@ cm.define('layersTreeWidgetContainer', ['sidebarWidget', 'config'], function (cm
         return null;
     }
 
-    if (!(nsGmx.LayersTreeWidget && layersTree && sidebarWidget)) {
+    if (!(nsGmx.LayersTreeWidget && sidebarWidget)) {
         return false;
     }
 
