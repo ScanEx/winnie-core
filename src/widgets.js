@@ -1,48 +1,3 @@
-cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
-    var resetter = cm.get('resetter');
-    var config = cm.get('config');
-    var map = cm.get('map')
-
-    if (config.app.sidebarWidget && nsGmx.IconSidebarControl) {
-        var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
-        sidebarControl.addTo(map);
-        sidebarControl.on('opening', function() {
-            resetter.reset();
-        });
-        sidebarControl.on('closing', function() {
-            resetter.reset();
-        });
-        if (nsGmx.Utils.isMobile()) {
-            sidebarControl.setMode('mobile');
-        }
-        sidebarControl.on('stick', function(e) {
-            [
-                cm.get('baseLayersControl'),
-                cm.get('logoControl'),
-                cm.get('hideControl'),
-                cm.get('zoomControl'),
-                cm.get('centerControl'),
-                cm.get('bottomControl'),
-                cm.get('locationControl'),
-                cm.get('copyrightControl'),
-                cm.get('loaderStatusControl'),
-                map.zoomControl,
-                map.attributionControl
-            ].map(function(ctrl) {
-                if (e.isStuck) {
-                    ctrl && L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
-                } else {
-                    ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
-                }
-                resetter.reset();
-            });
-        });
-        return sidebarControl;
-    } else {
-        return null;
-    }
-});
-
 cm.define('layersTreeWidget', ['sidebarWidget', 'layersTree', 'resetter', 'config', 'map'], function(cm) {
     var sidebarWidget = cm.get('sidebarWidget');
     var layersTree = cm.get('layersTree');
@@ -176,60 +131,13 @@ cm.define('storytellingWidget', ['permalinkManager', 'rawTree', 'config', 'map']
     }
 });
 
-cm.define('calendarContainer', ['hideControl', 'sidebarWidget', 'config', 'map'], function(cm) {
-    var sidebarWidget = cm.get('sidebarWidget');
-    var hideControl = cm.get('hideControl');
-    var config = cm.get('config');
-    var map = cm.get('map');
-
-    if (!config.app.calendarWidget) {
-        return null;
-    }
-
-    if (!(window.$ && window.nsGmx.GmxWidget && window.nsGmx.Utils)) {
-        return false;
-    }
-
-    var CalendarContainer = L.Control.extend({
-        includes: [nsGmx.GmxWidgetMixin, L.Mixin.Events],
-        onAdd: function(map) {
-            var container = this._container = L.DomUtil.create('div', 'calendarContainer');
-            this._terminateMouseEvents();
-
-            if (nsGmx.Utils.isMobile()) {
-                L.DomUtil.addClass(container, 'calendarContainer_mobile');
-            } else {
-                L.DomUtil.addClass(container, 'calendarContainer_desktop');
-            }
-
-            L.DomEvent.addListener(container, 'click', function() {
-                this.fire('click');
-            }, this);
-
-            return container;
-        }
-    });
-
-    var calendarContainer = new CalendarContainer({
-        position: 'topright'
-    });
-
-    map.addControl(calendarContainer);
-
-    hideControl && hideControl.on('statechange', function(ev) {
-        ev.target.options.isActive ? calendarContainer.show() : calendarContainer.hide();
-    });
-
-    return calendarContainer;
-});
-
-cm.define('calendarWidget', ['calendarContainer', 'calendar', 'resetter', 'config'], function(cm) {
-    var calendarContainer = cm.get('calendarContainer');
+cm.define('calendarWidget', ['calendarWidgetContainer', 'calendar', 'resetter', 'config'], function(cm) {
+    var calendarWidgetContainer = cm.get('calendarWidgetContainer');
     var calendar = cm.get('calendar');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
 
-    if (!calendar || !calendarContainer || !config.app.calendarWidget) {
+    if (!calendarWidgetContainer) {
         return null;
     }
 
@@ -241,11 +149,8 @@ cm.define('calendarWidget', ['calendarContainer', 'calendar', 'resetter', 'confi
         return false;
     }
 
-    $(container).addClass('gmxApplication_withCalendar');
-
     var calendarWidget = new calendarClass(L.extend({
         dateInterval: calendar,
-        container: calendarContainer.getContainer(),
         dateFormat: 'dd-mm-yy',
         dateMax: new Date()
     }, config.app.calendarWidget));
@@ -253,6 +158,8 @@ cm.define('calendarWidget', ['calendarContainer', 'calendar', 'resetter', 'confi
     resetter.on('reset', function() {
         calendarWidget.reset();
     });
+
+    calendarWidgetContainer.addView(calendarWidget);
 
     return calendarWidget;
 });

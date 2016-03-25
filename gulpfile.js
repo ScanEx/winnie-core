@@ -13,6 +13,7 @@ gulp.task('js', function() {
             'src/map.js',
             'src/layers.js',
             'src/controls.js',
+            'src/containers.js',
             'src/widgets.js',
             'src/tail.js',
             'src/_footer.js'
