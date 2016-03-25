@@ -6,6 +6,29 @@ var ContainerView = Backbone.View.extend({
     }
 });
 
+// returns nsGmx.ScrollView
+function createScrollingSidebarTab(sidebarWidget, tabId, tabIcon) {
+    var container = sidebarWidget.addTab(tabId, tabIcon);
+    var scrollView = new nsGmx.ScrollView();
+    scrollView.appendTo(container);
+
+    $(window).on('resize', function() {
+        scrollView.repaint();
+    });
+
+    function repaint(le) {
+        if (le.id === tabId) {
+            scrollView.repaint();
+        }
+    }
+
+    sidebarWidget.on('content', repaint);
+    sidebarWidget.on('opened', repaint);
+    sidebarWidget.on('stick', repaint);
+
+    return scrollView;
+}
+
 cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
     var resetter = cm.get('resetter');
     var config = cm.get('config');
@@ -110,28 +133,28 @@ cm.define('layersTreeWidgetContainer', ['sidebarWidget', 'config'], function (cm
         return null;
     }
 
-    if (!(nsGmx.LayersTreeWidget && sidebarWidget)) {
+    if (!nsGmx.LayersTreeWidget || !sidebarWidget) {
         return false;
     }
 
-    var container = sidebarWidget.addTab('sidebarTab-layersTree', 'icon-layers');
+    var scrollView = createScrollingSidebarTab(sidebarWidget, 'sidebarTab-layersTree', 'icon-layers');
 
-    var scrollView = new nsGmx.ScrollView();
+    return scrollView;
+});
 
-    scrollView.appendTo(container);
+cm.define('bookmarksWidgetContainer', ['sidebarWidget', 'config'], function (cm) {
+    var sidebarWidget = cm.get('sidebarWidget');
+    var config = cm.get('config');
 
-    $(window).on('resize', function() {
-        scrollView.repaint();
-    });
-
-    function repaint(le) {
-        if (le.id === 'sidebarTab-layersTree') {
-            scrollView.repaint();
-        }
+    if (!config.app.bookmarksWidget) {
+        return null;
     }
-    sidebarWidget.on('content', repaint);
-    sidebarWidget.on('opened', repaint);
-    sidebarWidget.on('stick', repaint);
+
+    if (!nsGmx.BookmarksWidget || !sidebarWidget) {
+        return false;
+    }
+
+    var scrollView = createScrollingSidebarTab(sidebarWidget, 'sidebarTab-bookmarksWidget', 'icon-bookmark');
 
     return scrollView;
 });

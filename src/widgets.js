@@ -28,53 +28,30 @@ cm.define('layersTreeWidget', ['layersTreeWidgetContainer', 'layersTree', 'reset
     return layersTreeWidget;
 });
 
-cm.define('bookmarksWidget', ['map', 'rawTree', 'sidebarWidget', 'permalinkManager'], function(cm) {
-    var config = cm.get('config');
-    var sidebar = cm.get('sidebarWidget');
-    var rawTree = cm.get('rawTree');
+cm.define('bookmarksWidget', ['bookmarksWidgetContainer', 'permalinkManager', 'rawTree'], function(cm) {
+    var bookmarksWidgetContainer = cm.get('bookmarksWidgetContainer');
     var permalinkManager = cm.get('permalinkManager');
+    var rawTree = cm.get('rawTree');
 
-    if (!permalinkManager) {
+    if (!permalinkManager || !bookmarksWidgetContainer) {
         return null;
     }
 
-    if (config.app.bookmarksWidget && nsGmx.BookmarksWidget && rawTree && sidebar) {
-        var container = sidebar.addTab('sidebarTab-bookmarksWidget', 'icon-bookmark');
-        var bookmarksWidget = new nsGmx.BookmarksWidget({
-            collection: new Backbone.Collection(JSON.parse(rawTree.properties.UserData && rawTree.properties.UserData).tabs)
-        });
-
-        bookmarksWidget.on('selected', function(model) {
-            permalinkManager.loadFromData(model.get('state'));
-        });
-
-        if (nsGmx.ScrollView) {
-            var scrollView = new nsGmx.ScrollView({
-                views: [bookmarksWidget]
-            });
-
-            $(window).on('resize', function() {
-                scrollView.repaint();
-            });
-
-            function repaint(le) {
-                if (le.id === 'sidebarTab-bookmarksWidget') {
-                    scrollView.repaint();
-                }
-            }
-            sidebar.on('content', repaint);
-            sidebar.on('opened', repaint);
-            sidebar.on('stick', repaint);
-
-            scrollView.appendTo(container);
-        } else {
-            bookmarksWidget.appendTo(container);
-        }
-
-        return bookmarksWidget;
-    } else {
-        return null;
+    if (!rawTree) {
+        return false;
     }
+
+    var bookmarksWidget = new nsGmx.BookmarksWidget({
+        collection: new Backbone.Collection(JSON.parse(rawTree.properties.UserData && rawTree.properties.UserData).tabs)
+    });
+
+    bookmarksWidget.on('selected', function(model) {
+        permalinkManager.loadFromData(model.get('state'));
+    });
+
+    bookmarksWidgetContainer.addView(bookmarksWidget);
+
+    return bookmarksWidget;
 });
 
 cm.define('storytellingWidget', ['permalinkManager', 'rawTree', 'config', 'map'], function(cm) {
