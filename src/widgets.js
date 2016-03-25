@@ -1,19 +1,13 @@
-cm.define('layersTreeWidget', ['sidebarWidget', 'layersTree', 'resetter', 'config', 'map'], function(cm) {
-    var sidebarWidget = cm.get('sidebarWidget');
+cm.define('layersTreeWidget', ['layersTreeWidgetContainer', 'layersTree', 'resetter', 'config', 'map'], function(cm) {
+    var layersTreeWidgetContainer = cm.get('layersTreeWidgetContainer');
     var layersTree = cm.get('layersTree');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
     var map = cm.get('map');
 
-    if (!config.app.layersTreeWidget) {
+    if (!layersTreeWidgetContainer) {
         return null;
     }
-
-    if (!(nsGmx.LayersTreeWidget && layersTree && sidebarWidget)) {
-        return false;
-    }
-
-    var container = sidebarWidget.addTab('sidebarTab-layersTree', 'icon-layers');
 
     var layersTreeWidget = new nsGmx.LayersTreeWidget(L.extend({
         isMobile: nsGmx.Utils.isMobile()
@@ -23,34 +17,13 @@ cm.define('layersTreeWidget', ['sidebarWidget', 'layersTree', 'resetter', 'confi
 
     layersTreeWidget.on('centerLayer', function(model) {
         map.fitBounds(model.getLatLngBounds());
-    })
+    });
 
     resetter.on('reset', function() {
         layersTreeWidget.reset();
     });
 
-    if (nsGmx.ScrollView) {
-        var scrollView = new nsGmx.ScrollView({
-            views: [layersTreeWidget]
-        });
-
-        $(window).on('resize', function() {
-            scrollView.repaint();
-        });
-
-        function repaint(le) {
-            if (le.id === 'sidebarTab-layersTree') {
-                scrollView.repaint();
-            }
-        }
-        sidebarWidget.on('content', repaint);
-        sidebarWidget.on('opened', repaint);
-        sidebarWidget.on('stick', repaint);
-
-        scrollView.appendTo(container);
-    } else {
-        layersTreeWidget.appendTo(container);
-    }
+    layersTreeWidgetContainer.addView(layersTreeWidget);
 
     return layersTreeWidget;
 });

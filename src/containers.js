@@ -101,3 +101,37 @@ cm.define('calendarWidgetContainer', ['hideControl', 'sidebarWidget', 'container
         el: calendarContainerControl.getContainer()
     });
 });
+
+cm.define('layersTreeWidgetContainer', ['sidebarWidget', 'config'], function (cm) {
+    var sidebarWidget = cm.get('sidebarWidget');
+    var config = cm.get('config');
+
+    if (!config.app.layersTreeWidget) {
+        return null;
+    }
+
+    if (!(nsGmx.LayersTreeWidget && layersTree && sidebarWidget)) {
+        return false;
+    }
+
+    var container = sidebarWidget.addTab('sidebarTab-layersTree', 'icon-layers');
+
+    var scrollView = new nsGmx.ScrollView();
+
+    scrollView.appendTo(container);
+
+    $(window).on('resize', function() {
+        scrollView.repaint();
+    });
+
+    function repaint(le) {
+        if (le.id === 'sidebarTab-layersTree') {
+            scrollView.repaint();
+        }
+    }
+    sidebarWidget.on('content', repaint);
+    sidebarWidget.on('opened', repaint);
+    sidebarWidget.on('stick', repaint);
+
+    return scrollView;
+});
