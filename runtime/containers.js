@@ -74,6 +74,26 @@ cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
     }
 });
 
+cm.define('fullscreenPagingPane', [], function () {
+    var map = cm.get('map');
+
+    var fullscreenPagingPane = new nsGmx.FullscreenPagingPaneControl();
+
+    return fullscreenPagingPane;
+});
+
+cm.define('mobileButtonsPane', ['map'], function () {
+    var map = cm.get('map');
+
+    var mobileButtonsPane = new nsGmx.MobileButtonsPaneControl({
+        position: 'bottom'
+    });
+
+    mobileButtonsPane.addTo(map);
+
+    return mobileButtonsPane;
+});
+
 cm.define('calendarWidgetContainer', ['hideControl', 'sidebarWidget', 'container', 'config', 'map'], function(cm) {
     var sidebarWidget = cm.get('sidebarWidget');
     var hideControl = cm.get('hideControl');

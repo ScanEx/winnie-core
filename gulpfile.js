@@ -8,15 +8,17 @@ gulp.task('css', function() {
 
 gulp.task('js', function() {
     return gulp.src([
-            'src/_header.js',
-            'src/core.js',
-            'src/map.js',
-            'src/layers.js',
-            'src/controls.js',
-            'src/containers.js',
-            'src/widgets.js',
-            'src/tail.js',
-            'src/_footer.js'
+            'lib/FullscreenPagingPaneControl.js',
+            'lib/MobileButtonsPaneControl.js',
+            'runtime/_header.js',
+            'runtime/core.js',
+            'runtime/map.js',
+            'runtime/layers.js',
+            'runtime/controls.js',
+            'runtime/containers.js',
+            'runtime/widgets.js',
+            'runtime/tail.js',
+            'runtime/_footer.js'
         ])
         .pipe(concat('gmxApplication.js'))
         .pipe(gulp.dest('dist'));
