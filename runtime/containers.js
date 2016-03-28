@@ -1,5 +1,5 @@
 var ContainerView = Backbone.View.extend({
-    addView: function (view) {
+    addView: function(view) {
         this.view = view;
         this.$el.append(view.el);
         this.trigger('addview');
@@ -74,91 +74,129 @@ cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
     }
 });
 
-cm.define('mobileButtonsPane', ['map'], function (cm) {
-    var map = cm.get('map');
-
-    var mobileButtonsPane = new nsGmx.MobileButtonsPaneControl({
-        position: 'bottom'
-    });
-
-    mobileButtonsPane.addTo(map);
-
-    return mobileButtonsPane;
-});
-
-cm.define('fullscreenPagingPane', ['map'], function (cm) {
+cm.define('fullscreenPagingPane', ['map'], function() {
     var map = cm.get('map');
 
     var fullscreenPagingPane = new nsGmx.FullscreenPagingPaneControl();
-
     fullscreenPagingPane.addTo(map);
 
     return fullscreenPagingPane;
 });
 
-cm.define('fppTest', ['fullscreenPagingPane'], function (cm) {
-    var fpp = cm.get('fullscreenPagingPane');
-    var pane1 = fpp.addPane('pane1');
-    pane1.innerHTML = 'pane1';
-    var pane2 = fpp.addPane('pane2');
-    pane2.innerHTML = 'pane2';
-    window.fpp = fpp;
-    fpp.showPane('pane2');
-    return fpp;
-})
-
-cm.define('calendarWidgetContainer', ['hideControl', 'sidebarWidget', 'container', 'config', 'map'], function(cm) {
-    var sidebarWidget = cm.get('sidebarWidget');
-    var hideControl = cm.get('hideControl');
-    var container = cm.get('container');
-    var config = cm.get('config');
+cm.define('mobileButtonsPaneControl', ['map', 'container', 'fullscreenPagingPane'], function() {
+    var fullscreenPagingPane = cm.get('fullscreenPagingPane');
+    var mainContainer = cm.get('container');
     var map = cm.get('map');
 
-    if (!config.app.calendarWidget) {
-        return null;
-    }
+    var mobileButtonsPaneControl = new nsGmx.MobileButtonsPaneControl();
 
-    if (!(window.$ && window.nsGmx.GmxWidget && window.nsGmx.Utils)) {
-        return false;
-    }
+    mobileButtonsPaneControl.getMainPane().once('addview', function () {
+        $(mainContainer).addClass('gmxApplication_withMobileBar');
+        mobileButtonsPaneControl.addTo(map);
+    });
 
-    var CalendarContainerControl = L.Control.extend({
-        includes: [nsGmx.GmxWidgetMixin, L.Mixin.Events],
-        onAdd: function(map) {
-            var container = this._container = L.DomUtil.create('div', 'calendarContainer');
-            this._terminateMouseEvents();
+    mobileButtonsPaneControl.on('backbuttonclick', function() {
+        fullscreenPagingPane.hideView();
+    });
 
-            if (nsGmx.Utils.isMobile()) {
-                L.DomUtil.addClass(container, 'calendarContainer_mobile');
-            } else {
-                L.DomUtil.addClass(container, 'calendarContainer_desktop');
-            }
+    fullscreenPagingPane.on('showview', function () {
+        mobileButtonsPaneControl.showView('back');
+    });
 
-            L.DomEvent.addListener(container, 'click', function() {
-                this.fire('click');
-            }, this);
+    return mobileButtonsPaneControl;
+});
 
-            return container;
+cm.define('mobileButtonsPane', ['mobileButtonsPaneControl'], function(cm) {
+    return cm.get('mobileButtonsPaneControl').getMainPane();
+});
+
+cm.define('calendarWidgetContainer', [
+        'fullscreenPagingPane',
+        'mobileButtonsPane',
+        'sidebarWidget',
+        'hideControl',
+        'container',
+        'config',
+        'map'
+    ],
+    function(cm) {
+        var fullscreenPagingPane = cm.get('fullscreenPagingPane');
+        var mobileButtonsPane = cm.get('mobileButtonsPane');
+        var sidebarWidget = cm.get('sidebarWidget');
+        var hideControl = cm.get('hideControl');
+        var mainContainer = cm.get('container');
+        var config = cm.get('config');
+        var map = cm.get('map');
+
+        if (!config.app.calendarWidget) {
+            return null;
+        }
+
+        if (!(window.$ && window.nsGmx.GmxWidget && window.nsGmx.Utils)) {
+            return false;
+        }
+
+        return nsGmx.Utils.isMobile() ? createMobileContainer() : createDesktopContainer()
+
+        function createDesktopContainer() {
+            var CalendarContainerControl = L.Control.extend({
+                includes: [nsGmx.GmxWidgetMixin, L.Mixin.Events],
+                onAdd: function(map) {
+                    var container = this._container = L.DomUtil.create('div', 'calendarContainer');
+                    this._terminateMouseEvents();
+
+                    if (nsGmx.Utils.isMobile()) {
+                        L.DomUtil.addClass(container, 'calendarContainer_mobile');
+                    } else {
+                        L.DomUtil.addClass(container, 'calendarContainer_desktop');
+                    }
+
+                    L.DomEvent.addListener(container, 'click', function() {
+                        this.fire('click');
+                    }, this);
+
+                    return container;
+                },
+
+                addView: function(view) {
+                    this._container.appendChild(view.el);
+                }
+            });
+
+            var calendarContainerControl = new CalendarContainerControl({
+                position: 'topright'
+            });
+
+            map.addControl(calendarContainerControl);
+            $(mainContainer).addClass('gmxApplication_withCalendar');
+
+            hideControl && hideControl.on('statechange', function(ev) {
+                ev.target.options.isActive ? calendarContainerControl.show() : calendarContainerControl.hide();
+            });
+
+            return calendarContainerControl;
+        }
+
+        function createMobileContainer() {
+            return {
+                addView: function(view) {
+                    var pane = fullscreenPagingPane.addView('calendarWidget', view);
+
+                    var button = new nsGmx.IconButtonWidget({
+                        className: 'icon-calendar'
+                    });
+
+                    button.on('click', function() {
+                        fullscreenPagingPane.showView('calendarWidget');
+                    });
+
+                    mobileButtonsPane.addView(button);
+                }
+            };
         }
     });
 
-    var calendarContainerControl = new CalendarContainerControl({
-        position: 'topright'
-    });
-
-    map.addControl(calendarContainerControl);
-    $(container).addClass('gmxApplication_withCalendar');
-
-    hideControl && hideControl.on('statechange', function(ev) {
-        ev.target.options.isActive ? calendarContainerControl.show() : calendarContainerControl.hide();
-    });
-
-    return new ContainerView({
-        el: calendarContainerControl.getContainer()
-    });
-});
-
-cm.define('layersTreeWidgetContainer', ['sidebarWidget', 'config'], function (cm) {
+cm.define('layersTreeWidgetContainer', ['sidebarWidget', 'config'], function(cm) {
     var sidebarWidget = cm.get('sidebarWidget');
     var config = cm.get('config');
 
@@ -175,7 +213,7 @@ cm.define('layersTreeWidgetContainer', ['sidebarWidget', 'config'], function (cm
     return scrollView;
 });
 
-cm.define('bookmarksWidgetContainer', ['sidebarWidget', 'config'], function (cm) {
+cm.define('bookmarksWidgetContainer', ['sidebarWidget', 'config'], function(cm) {
     var sidebarWidget = cm.get('sidebarWidget');
     var config = cm.get('config');
 

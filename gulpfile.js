@@ -8,6 +8,8 @@ gulp.task('css', function() {
 
 gulp.task('js', function() {
     return gulp.src([
+            'lib/PagingView.js',
+            'lib/FullscreenControlMixin.js',
             'lib/FullscreenPagingPaneControl.js',
             'lib/MobileButtonsPaneControl.js',
             'runtime/_header.js',
