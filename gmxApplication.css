@@ -38,3 +38,7 @@
 .debugWindowControl_active { display: block; }
 
 .gmxApplication_platform-ios .leaflet-top .leaflet-control { margin-top: 25px; }
+
+.fullscreenPagingPaneControl-controlCorner { z-index: 100500; }
+.fullscreenPagingPaneControl-container.fullscreenPagingPaneControl_fullscreen { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+.fullscreenPagingPaneControl-controlCorner.fullscreenPagingPaneControl_fullscreen { background: #fff; }

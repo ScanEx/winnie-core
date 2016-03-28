@@ -74,15 +74,7 @@ cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
     }
 });
 
-cm.define('fullscreenPagingPane', [], function () {
-    var map = cm.get('map');
-
-    var fullscreenPagingPane = new nsGmx.FullscreenPagingPaneControl();
-
-    return fullscreenPagingPane;
-});
-
-cm.define('mobileButtonsPane', ['map'], function () {
+cm.define('mobileButtonsPane', ['map'], function (cm) {
     var map = cm.get('map');
 
     var mobileButtonsPane = new nsGmx.MobileButtonsPaneControl({
@@ -93,6 +85,27 @@ cm.define('mobileButtonsPane', ['map'], function () {
 
     return mobileButtonsPane;
 });
+
+cm.define('fullscreenPagingPane', ['map'], function (cm) {
+    var map = cm.get('map');
+
+    var fullscreenPagingPane = new nsGmx.FullscreenPagingPaneControl();
+
+    fullscreenPagingPane.addTo(map);
+
+    return fullscreenPagingPane;
+});
+
+cm.define('fppTest', ['fullscreenPagingPane'], function (cm) {
+    var fpp = cm.get('fullscreenPagingPane');
+    var pane1 = fpp.addPane('pane1');
+    pane1.innerHTML = 'pane1';
+    var pane2 = fpp.addPane('pane2');
+    pane2.innerHTML = 'pane2';
+    window.fpp = fpp;
+    fpp.showPane('pane2');
+    return fpp;
+})
 
 cm.define('calendarWidgetContainer', ['hideControl', 'sidebarWidget', 'container', 'config', 'map'], function(cm) {
     var sidebarWidget = cm.get('sidebarWidget');
