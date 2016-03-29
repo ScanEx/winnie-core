@@ -29,6 +29,28 @@ function createScrollingSidebarTab(sidebarWidget, tabId, tabIcon) {
     return scrollView;
 }
 
+function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, buttonIcon) {
+    var scrollView = new nsGmx.ScrollView();
+
+    var pane = fullscreenPagingPane.addView(viewId, scrollView);
+
+    var button = new nsGmx.IconButtonWidget({
+        className: buttonIcon
+    });
+
+    button.on('click', function() {
+        fullscreenPagingPane.showView(viewId);
+    });
+
+    fullscreenPagingPane.on('showview', function () {
+        scrollView.repaint();
+    });
+
+    mobileButtonsPane.addView(button);
+
+    return scrollView;
+}
+
 cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
     var resetter = cm.get('resetter');
     var config = cm.get('config');
@@ -90,7 +112,7 @@ cm.define('mobileButtonsPaneControl', ['map', 'container', 'fullscreenPagingPane
 
     var mobileButtonsPaneControl = new nsGmx.MobileButtonsPaneControl();
 
-    mobileButtonsPaneControl.getMainPane().once('addview', function () {
+    mobileButtonsPaneControl.getMainPane().once('addview', function() {
         $(mainContainer).addClass('gmxApplication_withMobileBar');
         mobileButtonsPaneControl.addTo(map);
     });
@@ -99,7 +121,7 @@ cm.define('mobileButtonsPaneControl', ['map', 'container', 'fullscreenPagingPane
         fullscreenPagingPane.hideView();
     });
 
-    fullscreenPagingPane.on('showview', function () {
+    fullscreenPagingPane.on('showview', function() {
         mobileButtonsPaneControl.showView('back');
     });
 
@@ -196,7 +218,9 @@ cm.define('calendarWidgetContainer', [
         }
     });
 
-cm.define('layersTreeWidgetContainer', ['sidebarWidget', 'config'], function(cm) {
+cm.define('layersTreeWidgetContainer', ['fullscreenPagingPane', 'mobileButtonsPane', 'sidebarWidget', 'config'], function(cm) {
+    var fullscreenPagingPane = cm.get('fullscreenPagingPane');
+    var mobileButtonsPane = cm.get('mobileButtonsPane');
     var sidebarWidget = cm.get('sidebarWidget');
     var config = cm.get('config');
 
@@ -208,12 +232,16 @@ cm.define('layersTreeWidgetContainer', ['sidebarWidget', 'config'], function(cm)
         return false;
     }
 
-    var scrollView = createScrollingSidebarTab(sidebarWidget, 'sidebarTab-layersTree', 'icon-layers');
-
-    return scrollView;
+    if (!nsGmx.Utils.isMobile()) {
+        return createScrollingSidebarTab(sidebarWidget, 'sidebarTab-layersTree', 'icon-layers');
+    } else {
+        return createScrollingPage(fullscreenPagingPane, mobileButtonsPane, 'layersTreeWidget', 'icon-layers');
+    }
 });
 
-cm.define('bookmarksWidgetContainer', ['sidebarWidget', 'config'], function(cm) {
+cm.define('bookmarksWidgetContainer', ['fullscreenPagingPane', 'mobileButtonsPane', 'sidebarWidget', 'config'], function(cm) {
+    var fullscreenPagingPane = cm.get('fullscreenPagingPane');
+    var mobileButtonsPane = cm.get('mobileButtonsPane');
     var sidebarWidget = cm.get('sidebarWidget');
     var config = cm.get('config');
 
@@ -225,7 +253,9 @@ cm.define('bookmarksWidgetContainer', ['sidebarWidget', 'config'], function(cm) 
         return false;
     }
 
-    var scrollView = createScrollingSidebarTab(sidebarWidget, 'sidebarTab-bookmarksWidget', 'icon-bookmark');
-
-    return scrollView;
+    if (!nsGmx.Utils.isMobile()) {
+        return createScrollingSidebarTab(sidebarWidget, 'sidebarTab-bookmarksWidget', 'icon-bookmark');
+    } else {
+        return createScrollingPage(fullscreenPagingPane, mobileButtonsPane, 'bookmarksWidget', 'icon-bookmark');
+    }
 });
