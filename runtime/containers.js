@@ -7,8 +7,8 @@ var ContainerView = Backbone.View.extend({
 });
 
 // returns nsGmx.ScrollView
-function createScrollingSidebarTab(sidebarWidget, tabId, tabIcon) {
-    var container = sidebarWidget.addTab(tabId, tabIcon);
+function createScrollingSidebarTab(sidebarWidget, tabId, tabIcon, buttonPriority) {
+    var container = sidebarWidget.addTab(tabId, tabIcon, buttonPriority);
     var scrollView = new nsGmx.ScrollView();
     scrollView.appendTo(container);
 
@@ -29,7 +29,7 @@ function createScrollingSidebarTab(sidebarWidget, tabId, tabIcon) {
     return scrollView;
 }
 
-function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, buttonIcon) {
+function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, buttonIcon, buttonPriority) {
     var scrollView = new nsGmx.ScrollView();
 
     var pane = fullscreenPagingPane.addView(viewId, scrollView);
@@ -46,7 +46,7 @@ function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, bu
         scrollView.repaint();
     });
 
-    mobileButtonsPane.addView(button);
+    mobileButtonsPane.addView(button, buttonPriority);
 
     return scrollView;
 }
@@ -212,7 +212,7 @@ cm.define('calendarWidgetContainer', [
                         fullscreenPagingPane.showView('calendarWidget');
                     });
 
-                    mobileButtonsPane.addView(button);
+                    mobileButtonsPane.addView(button, 10);
                 }
             };
         }
@@ -233,9 +233,9 @@ cm.define('layersTreeWidgetContainer', ['fullscreenPagingPane', 'mobileButtonsPa
     }
 
     if (!nsGmx.Utils.isMobile()) {
-        return createScrollingSidebarTab(sidebarWidget, 'sidebarTab-layersTree', 'icon-layers');
+        return createScrollingSidebarTab(sidebarWidget, 'sidebarTab-layersTree', 'icon-layers', 30);
     } else {
-        return createScrollingPage(fullscreenPagingPane, mobileButtonsPane, 'layersTreeWidget', 'icon-layers');
+        return createScrollingPage(fullscreenPagingPane, mobileButtonsPane, 'layersTreeWidget', 'icon-layers', 30);
     }
 });
 
@@ -254,8 +254,8 @@ cm.define('bookmarksWidgetContainer', ['fullscreenPagingPane', 'mobileButtonsPan
     }
 
     if (!nsGmx.Utils.isMobile()) {
-        return createScrollingSidebarTab(sidebarWidget, 'sidebarTab-bookmarksWidget', 'icon-bookmark');
+        return createScrollingSidebarTab(sidebarWidget, 'sidebarTab-bookmarksWidget', 'icon-bookmark', 50);
     } else {
-        return createScrollingPage(fullscreenPagingPane, mobileButtonsPane, 'bookmarksWidget', 'icon-bookmark');
+        return createScrollingPage(fullscreenPagingPane, mobileButtonsPane, 'bookmarksWidget', 'icon-bookmark', 50);
     }
 });
