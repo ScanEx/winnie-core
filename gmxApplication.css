@@ -52,3 +52,5 @@
 .gmxApplication_withMobileBar .leaflet-bottom.mobileButtonsPaneControl-controlCorner { bottom: 0; }
 
 .iconButtonWidget { cursor: pointer; font-size: 18px; }
+
+.fullscreenPagingPaneControl_page-calendarWidget { display: flex; align-items: center; justify-content: center; }
