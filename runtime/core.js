@@ -39,7 +39,8 @@ cm.define('config', [], function(cm, cb) {
                 storytellingWidget: false,
                 sidebarWidget: false,
                 calendarWidget: false,
-                globals: false
+                globals: false,
+                mobilePopups: nsGmx.Utils.isMobile()
             },
             state: {
                 map: {
