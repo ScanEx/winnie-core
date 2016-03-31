@@ -99,7 +99,14 @@ cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
 cm.define('fullscreenPagingPane', ['map'], function() {
     var map = cm.get('map');
 
-    var fullscreenPagingPane = new nsGmx.FullscreenPagingPaneControl();
+    var fullscreenPagingPane = new (nsGmx.FullscreenPagingPaneControl.extend({
+        hideView: function () {
+            nsGmx.FullscreenPagingPaneControl.prototype.hideView.apply(this, arguments);
+            var mbpc = cm.get('mobileButtonsPaneControl');
+            mbpc && mbpc.showView('main');
+        }
+    }));
+
     fullscreenPagingPane.addTo(map);
 
     return fullscreenPagingPane;
