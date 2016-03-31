@@ -165,7 +165,8 @@ cm.define('calendarWidgetContainer', [
             return false;
         }
 
-        return nsGmx.Utils.isMobile() ? createMobileContainer() : createDesktopContainer()
+        // return nsGmx.Utils.isMobile() ? createMobileContainer() : createDesktopContainer()
+        return createDesktopContainer();   
 
         function createDesktopContainer() {
             var CalendarContainerControl = L.Control.extend({
