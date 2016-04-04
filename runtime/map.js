@@ -3,13 +3,10 @@ cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], functi
     var resetter = cm.get('resetter');
     var config = cm.get('config');
     var opts = config.app.map;
-
-    if (config.app.copyrightControl === 'leaflet') {
-        opts.attributionControl = true;
-    }
-
+    
     var map = L.map(container[0] || container, L.extend(opts, {
-        zoomControl: false
+        zoomControl: false,
+        attributionControl: false
     }));
 
     map.on('click zoomstart', function(le) {
