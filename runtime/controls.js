@@ -48,14 +48,16 @@ cm.define('zoomControl', ['map', 'config', 'i18n'], function(cm) {
     if (!window.L.control.gmxZoom) {
         return false;
     }
-    if (opts && opts !== 'leaflet') {
+    if ((opts && opts === 'leaflet') || (opts && opts.type === 'leaflet')) {
+        var ctrl = L.control.zoom((typeof opts === 'object') ? opts : {});
+        cm.get('map').addControl(ctrl);
+        return ctrl;
+    } else {
         var ctrl = L.control.gmxZoom(
             (typeof opts === 'object') ? opts : {}
         );
         cm.get('map').addControl(ctrl);
         return ctrl;
-    } else {
-        return null;
     }
 });
 

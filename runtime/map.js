@@ -4,15 +4,13 @@ cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], functi
     var config = cm.get('config');
     var opts = config.app.map;
 
-    if (config.app.zoomControl === 'leaflet') {
-        opts.zoomControl = true;
-    }
-
     if (config.app.copyrightControl === 'leaflet') {
         opts.attributionControl = true;
     }
 
-    var map = L.map(container[0] || container, opts);
+    var map = L.map(container[0] || container, L.extend(opts, {
+        zoomControl: false
+    }));
 
     map.on('click zoomstart', function(le) {
         resetter.reset();
