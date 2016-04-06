@@ -124,12 +124,17 @@ cm.define('copyrightControl', ['map', 'config', 'i18n'], function(cm) {
         return false;
     }
 
+    var opts = config.app.copyrightControl;
+
+    if (!opts) {
+        return null;
+    }
+
     var ctrl = createCtrl();
     map.addControl(ctrl);
     return ctrl;
 
     function createCtrl() {
-        var opts = config.app.copyrightControl;
         if ((opts && opts === 'leaflet') || (opts && opts.type === 'leaflet')) {
             return L.control.attribution((typeof opts === 'object') ? opts : {});
         } else {
