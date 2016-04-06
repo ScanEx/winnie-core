@@ -56,3 +56,5 @@
 .fullscreenPagingPaneControl_page-calendarWidget { display: flex; align-items: center; justify-content: center; }
 
 .mobileButtonsPaneWidget .iconButtonWidget { padding: 0 10px; }
+
+.leaflet-popup.gmxPopup { max-width: 500px; }

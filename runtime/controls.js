@@ -44,18 +44,24 @@ cm.define('hideControl', ['map', 'config', 'i18n'], function(cm) {
 });
 
 cm.define('zoomControl', ['map', 'config', 'i18n'], function(cm) {
-    var opts = cm.get('config').app.zoomControl;
+    var config = cm.get('config');
+    var map = cm.get('map');
+
     if (!window.L.control.gmxZoom) {
         return false;
     }
-    if (opts && opts !== 'leaflet') {
-        var ctrl = L.control.gmxZoom(
-            (typeof opts === 'object') ? opts : {}
-        );
-        cm.get('map').addControl(ctrl);
-        return ctrl;
-    } else {
-        return null;
+
+    var ctrl = createCtrl();
+    map.addControl(ctrl);
+    return ctrl;
+
+    function createCtrl() {
+        var opts = config.app.zoomControl;
+        if ((opts && opts === 'leaflet') || (opts && opts.type === 'leaflet')) {
+            return L.control.zoom((typeof opts === 'object') ? opts : {});
+        } else {
+            return L.control.gmxZoom((typeof opts === 'object') ? opts : {});
+        }
     }
 });
 
@@ -111,18 +117,24 @@ cm.define('locationControl', ['map', 'config', 'i18n'], function(cm) {
 });
 
 cm.define('copyrightControl', ['map', 'config', 'i18n'], function(cm) {
-    var opts = cm.get('config').app.copyrightControl;
+    var config = cm.get('config');
+    var map = cm.get('map');
+
     if (!window.L.control.gmxCopyright) {
         return false;
     }
-    if (opts && opts !== 'leaflet') {
-        var ctrl = L.control.gmxCopyright(
-            (typeof opts === 'object') ? opts : {}
-        );
-        cm.get('map').addControl(ctrl);
-        return ctrl;
-    } else {
-        return null;
+
+    var ctrl = createCtrl();
+    map.addControl(ctrl);
+    return ctrl;
+
+    function createCtrl() {
+        var opts = config.app.copyrightControl;
+        if ((opts && opts === 'leaflet') || (opts && opts.type === 'leaflet')) {
+            return L.control.attribution((typeof opts === 'object') ? opts : {});
+        } else {
+            return L.control.gmxCopyright((typeof opts === 'object') ? opts : {});
+        }
     }
 });
 
