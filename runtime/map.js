@@ -168,9 +168,11 @@ cm.define('layersHash', ['gmxMap'], function(cm) {
     return cm.get('gmxMap').getLayersHash();
 });
 
-cm.define('gmxMapErrorHandler', ['gmxMap'], function(cm) {
+cm.define('gmxMapErrorHandler', ['gmxMap', 'debugWindow'], function(cm) {
+    var debugWindow = cm.get('debugWindow');
     var gmxMap = cm.get('gmxMap');
     if (gmxMap.error) {
+        debugWindow.log(gmxMap.error);
         console.error(gmxMap.error);
     }
     return null;
