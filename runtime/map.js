@@ -128,17 +128,26 @@ cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
     if (!L.gmx || !L.gmx.loadMap) {
         return false;
     }
-    L.gmx.loadMap(config.app.gmxMap.mapID, config.app.gmxMap).then(function(layers) {
-        cb({
-            getRawTree: function() {
-                return layers.rawTree;
-            },
-            getLayersHash: function() {
-                return layers.layersByID;
-            }
+
+    if (config.app.gmxMap.mapID === "" || config.app.gmxMap.mapID === null) {
+        cb(createEmptyMap());
+    } else {
+        L.gmx.loadMap(config.app.gmxMap.mapID, config.app.gmxMap).then(function(layers) {
+            cb({
+                getRawTree: function() {
+                    return layers.rawTree;
+                },
+                getLayersHash: function() {
+                    return layers.layersByID;
+                }
+            });
+        }, function(err) {
+            cb(createEmptyMap(err));
         });
-    }, function(err) {
-        cb({
+    }
+
+    function createEmptyMap(err) {
+        return {
             getRawTree: function() {
                 return {
                     properties: {
@@ -151,8 +160,8 @@ cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
                 return {};
             },
             error: err
-        })
-    });
+        }
+    }
 });
 
 cm.define('rawTree', ['gmxMap'], function(cm) {
@@ -185,7 +194,9 @@ cm.define('baseLayersManager', ['map', 'config', 'rawTree', 'permalinkManager'],
         return false;
     }
     map.gmxBaseLayersManager.initDefaults().then(function() {
-        map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
+        if (baseLayers && baseLayers.length) {
+            map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
+        }
         permalinkManager && permalinkManager.setIdentity('baseLayersManager', map.gmxBaseLayersManager);
         cb(map.gmxBaseLayersManager);
     });
