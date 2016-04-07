@@ -167,3 +167,13 @@ cm.define('container', [], function(cm) {
     }
     return containerEl;
 });
+
+cm.define('logger', [], function (cm) {
+    return new (Backbone.Collection.extend({
+        log: function (msg) {
+            this.add({
+                message: msg
+            });
+        }
+    }))
+});

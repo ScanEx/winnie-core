@@ -3,7 +3,7 @@ cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], functi
     var resetter = cm.get('resetter');
     var config = cm.get('config');
     var opts = config.app.map;
-    
+
     var map = L.map(container[0] || container, L.extend(opts, {
         zoomControl: false,
         attributionControl: false
@@ -163,11 +163,11 @@ cm.define('layersHash', ['gmxMap'], function(cm) {
     return cm.get('gmxMap').getLayersHash();
 });
 
-cm.define('gmxMapErrorHandler', ['gmxMap', 'debugWindow'], function(cm) {
-    var debugWindow = cm.get('debugWindow');
+cm.define('gmxMapErrorHandler', ['gmxMap', 'logger'], function(cm) {
+    var logger = cm.get('logger');
     var gmxMap = cm.get('gmxMap');
     if (gmxMap.error) {
-        debugWindow.log(gmxMap.error);
+        logger.log(gmxMap.error);
         console.error(gmxMap.error);
     }
     return null;
