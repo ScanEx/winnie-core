@@ -193,7 +193,9 @@ cm.define('baseLayersManager', ['map', 'config', 'rawTree', 'permalinkManager'],
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
         return false;
     }
-    map.gmxBaseLayersManager.initDefaults().then(function() {
+    map.gmxBaseLayersManager.initDefaults({
+        apiKey: config.app.gmxMap.apiKey
+    }).then(function() {
         if (baseLayers && baseLayers.length) {
             map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
         }
