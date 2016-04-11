@@ -162,6 +162,11 @@ cm.define('permalinkManager', ['mapsResourceServer', 'config'], function(cm, cb)
 cm.define('container', [], function(cm) {
     var containerEl = container[0] || container;
     L.DomUtil.addClass(containerEl, 'gmxApplication');
+    if (nsGmx.Utils && nsGmx.Utils.isMobile && nsGmx.Utils.isMobile()) {
+        L.DomUtil.addClass(containerEl, 'gmxApplication_mobile');
+    } else {
+        L.DomUtil.addClass(containerEl, 'gmxApplication_desktop');
+    }
     if (window.device && window.device.platform) {
         L.DomUtil.addClass(containerEl, 'gmxApplication_platform-' + window.device.platform.toLowerCase());
     }
