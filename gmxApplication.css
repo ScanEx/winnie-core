@@ -41,7 +41,7 @@
 
 .fullscreenPagingPaneControl-controlCorner { z-index: 100500; }
 .fullscreenPagingPaneControl.fullscreenPagingPaneControl_fullscreen { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
-.fullscreenPagingPaneControl-controlCorner.fullscreenPagingPaneControl_fullscreen { background: #fff; }
+.fullscreenPagingPaneControl-controlCorner_fullscreen, .fullscreenPagingPaneControl-controlCorner.fullscreenPagingPaneControl_fullscreen { background: #fff; }
 
 .mobileButtonsPaneControl-controlCorner { box-shadow: 0 0 2px hsla(0, 0%, 0%, 0.5); z-index: 100501; }
 .mobileButtonsPaneControl.leaflet-control { background: #fff; margin: 0; width: 100%; height: 50px; }
