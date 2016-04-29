@@ -216,10 +216,6 @@ cm.define('calendarWidgetContainer', [
             map.addControl(calendarContainerControl);
             $(mainContainer).addClass('gmxApplication_withCalendar');
 
-            hideControl && hideControl.on('statechange', function(ev) {
-                ev.target.options.isActive ? calendarContainerControl.show() : calendarContainerControl.hide();
-            });
-
             return calendarContainerControl;
         }
 
