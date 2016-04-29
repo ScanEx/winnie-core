@@ -51,23 +51,39 @@ function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, bu
     return scrollView;
 }
 
-cm.define('sidebarWidget', ['resetter', 'config', 'map'], function(cm) {
+cm.define('sidebarWidget', ['container', 'resetter', 'config', 'map'], function(cm) {
+    var rootContainer = cm.get('container');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
     var map = cm.get('map')
 
     if (config.app.sidebarWidget && nsGmx.IconSidebarControl) {
+        var position = config.app.sidebarWidget.position || 'right';
+        L.DomUtil.addClass(rootContainer, position === 'right' ? 'gmxApplication_withRightSidebar' : 'gmxApplication_withLeftSidebar');
+
         var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
         sidebarControl.addTo(map);
+
         sidebarControl.on('opening', function() {
             resetter.reset();
         });
+
         sidebarControl.on('closing', function() {
             resetter.reset();
         });
+
+        sidebarControl.on('opened', function(ev) {
+            $(rootContainer).addClass('gmxApplication_sidebarShift');
+        });
+
+        sidebarControl.on('closing', function() {
+            $(rootContainer).removeClass('gmxApplication_sidebarShift');
+        });
+
         if (nsGmx.Utils.isMobile()) {
             sidebarControl.setMode('mobile');
         }
+
         sidebarControl.on('stick', function(e) {
             [
                 cm.get('baseLayersControl'),
@@ -166,7 +182,7 @@ cm.define('calendarWidgetContainer', [
         }
 
         // return nsGmx.Utils.isMobile() ? createMobileContainer() : createDesktopContainer()
-        return createDesktopContainer();   
+        return createDesktopContainer();
 
         function createDesktopContainer() {
             var CalendarContainerControl = L.Control.extend({

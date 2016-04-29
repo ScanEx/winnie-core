@@ -58,3 +58,6 @@
 .mobileButtonsPaneWidget .iconButtonWidget { padding: 0 10px; }
 
 .leaflet-popup.gmxPopup { max-width: 500px; }
+
+.gmxApplication_withRightSidebar.gmxApplication_sidebarShift .leaflet-right .leaflet-control { margin-right: 325px; }
+.gmxApplication_withRightSidebar.gmxApplication_sidebarShift .leaflet-right.leaflet-left .leaflet-control { margin-right: 0px; }
