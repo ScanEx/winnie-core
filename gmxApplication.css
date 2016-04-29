@@ -64,3 +64,4 @@
 
 .gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left .leaflet-control { margin-left: 325px; }
 .gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left.leaflet-right .leaflet-control { margin-left: 0px; }
+.gmxApplication_withLeftSidebar .iconSidebarWidget .jspVerticalBar { left: 0; }
