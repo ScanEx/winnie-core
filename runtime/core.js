@@ -173,12 +173,25 @@ cm.define('container', [], function(cm) {
     return containerEl;
 });
 
-cm.define('logger', [], function (cm) {
-    return new (Backbone.Collection.extend({
-        log: function (msg) {
+cm.define('logger', [], function(cm) {
+    return new(Backbone.Collection.extend({
+        log: function(msg) {
             this.add({
                 message: msg
             });
         }
     }))
+});
+
+cm.define('datepickerFix', [], function(cm) {
+    // HACK: leaflet controls overlap datepicker @ set z-index more than leaflet control's
+    // (cannot change datepicker's container or override z-index)
+    $.datepicker.setDefaults({
+        beforeShow: function() {
+            setTimeout(function() {
+                $('#ui-datepicker-div').css('z-index', '1001');
+            }, 10);
+        }
+    });
+    return null;
 });
