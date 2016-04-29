@@ -1,7 +1,7 @@
 // returns config object
 cm.define('config', [], function(cm, cb) {
     var configConditions = function(config) {
-        if (config.app.layersTreeWidget || config.app.bookmarksWidget) {
+        if ((config.app.layersTreeWidget || config.app.bookmarksWidget) && !config.app.sidebarWidget) {
             config.app.sidebarWidget = {};
         }
         return config;
