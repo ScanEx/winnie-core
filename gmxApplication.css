@@ -65,5 +65,8 @@
 .gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left .leaflet-control { margin-left: 325px; }
 .gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left.leaflet-right .leaflet-control { margin-left: 0px; }
 
+.gmxApplication_sidebarShift .leaflet-right .calendarContainer.leaflet-control { margin-right: 10px; }
+.gmxApplication_sidebarShift .leaflet-left .calendarContainer.leaflet-control { margin-left: 10px; }
+
 /* there is a bug in jScrollPane (margin-left without srollbar), so we can't place scrollbar to the left */
 /*.gmxApplication_withLeftSidebar .iconSidebarControl .jspVerticalBar { left: 0; }*/
