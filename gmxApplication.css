@@ -68,5 +68,10 @@
 .gmxApplication_sidebarShift .leaflet-right .calendarContainer.leaflet-control { margin-right: 10px; }
 .gmxApplication_sidebarShift .leaflet-left .calendarContainer.leaflet-control { margin-left: 10px; }
 
+/* HACK: keep bottom gmx controls positions on sidebar opened */
+.gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left .leaflet-control.leaflet-gmx-copyright  { margin-left: 10px; }
+.gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left.leaflet-right .leaflet-control.leaflet-gmx-logo { margin-left: calc(50% - 50px); }
+.gmxApplication_withRightSidebar.gmxApplication_sidebarShift .leaflet-right .leaflet-control.leaflet-gmx-location { margin-right: 10px; }
+
 /* there is a bug in jScrollPane (margin-left without srollbar), so we can't place scrollbar to the left */
 /*.gmxApplication_withLeftSidebar .iconSidebarControl .jspVerticalBar { left: 0; }*/
