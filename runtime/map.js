@@ -123,15 +123,15 @@ cm.define('balloonsSerializer', ['permalinkManager', 'layersHash', 'map'], funct
     return serializer;
 });
 
-cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
+cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
     var config = cm.get('config');
+    var intl = cm.get('i18n');
+
     if (!L.gmx || !L.gmx.loadMap) {
         return false;
     }
 
-    if (config.app.gmxMap.mapID === "" || config.app.gmxMap.mapID === null) {
-        cb(createEmptyMap());
-    } else {
+    if (config.app && config.app.gmxMap && config.app.gmxMap.mapID) {
         L.gmx.loadMap(config.app.gmxMap.mapID, config.app.gmxMap).then(function(layers) {
             cb({
                 getRawTree: function() {
@@ -144,6 +144,92 @@ cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
         }, function(err) {
             cb(createEmptyMap(err));
         });
+    } else if (config.map) {
+        // debugger;
+        cb(parseMapConfig(config.map));
+    } else {
+        cb(createEmptyMap());
+    }
+
+    function parseMapConfig(mapConfig) {
+        // everything except of this will be in MetaProperties
+        var propsNames = ['id', 'type', 'title', 'description', 'expanded', 'visible', 'children'];
+
+        var layersHash = {};
+        var rawTree = rParseMapConfig({
+            id: 'map',
+            title: 'map',
+            children: mapConfig.layers
+        });
+
+        function rParseMapConfig(l) {
+            if (!l) {
+                return;
+            }
+
+            var props = {};
+            Object.keys(l).map(function(propName) {
+                if (propsNames.indexOf(propName) + 1) {
+                    props[propName] = l[propName];
+                }
+            })
+
+            props.title = typeof props.title === 'object' ? props.title[intl.getLanguage()] : props.title;
+            props.description = typeof props.description === 'object' ? props.description[intl.getLanguage()] : props.description;
+
+            if (l.children) {
+                var id = l.id || l.gmxId || 'group' + _.uniqueId();
+                props.GroupID = id;
+                props.name = id;
+            } else {
+                var id = l.id || l.gmxId || 'layer' + _.uniqueId();
+                props.LayerID = id;
+                props.name = id;
+            }
+
+            var metaProps = {};
+            Object.keys(l).map(function(propName) {
+                if (propsNames.indexOf(propName) + 1) {
+                    return;
+                } else {
+                    metaProps[propName] = {
+                        'Type': capitalize(typeof l[propName]),
+                        'Value': l[propName]
+                    };
+                }
+            });
+
+            props.MetaProperties = metaProps;
+
+            layersHash[props.name] = L.gmx.createLayer({
+                properties: props
+            });
+
+            return {
+                type: l.children ? 'group' : 'layer',
+                content: {
+                    properties: props,
+                    children: l.children && l.children.map(function(c) {
+                        return rParseMapConfig(c);
+                    }),
+                    geometry: null
+                }
+            }
+        }
+
+        return {
+            getRawTree: function() {
+                return {
+                    properties: {
+                        BaseLayers: '[]'
+                    },
+                    children: rawTree.content.children
+                }
+            },
+            getLayersHash: function() {
+                return layersHash;
+            }
+        }
     }
 
     function createEmptyMap(err) {
@@ -161,6 +247,10 @@ cm.define('gmxMap', ['map', 'config'], function(cm, cb) {
             },
             error: err
         }
+    }
+
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 });
 

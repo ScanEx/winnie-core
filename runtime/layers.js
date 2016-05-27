@@ -110,6 +110,10 @@ cm.define('layersClusters', ['layersHash', 'resetter', 'config', 'map'], functio
         initialize: function(options) {
             L.setOptions(this, options);
             _.mapObject(this.options.layersHash, function(layer, layerId) {
+                if (!layer.bindClusters) {
+                    return;
+                }
+
                 layer.bindClusters(
                     L.extend(
                         this.options.defaultClustersOptions,
