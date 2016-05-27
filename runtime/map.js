@@ -187,19 +187,7 @@ cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
                 props.name = id;
             }
 
-            var metaProps = {};
-            Object.keys(l).map(function(propName) {
-                if (propsNames.indexOf(propName) + 1) {
-                    return;
-                } else {
-                    metaProps[propName] = {
-                        'Type': capitalize(typeof l[propName]),
-                        'Value': l[propName]
-                    };
-                }
-            });
-
-            props.MetaProperties = metaProps;
+            props.MetaProperties = createMeta(l);
 
             layersHash[props.name] = L.gmx.createLayer({
                 properties: props
@@ -248,11 +236,29 @@ cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
             error: err
         }
     }
-
-    function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
 });
+
+function createMeta(l) {
+    var propsNames = ['id', 'type', 'title', 'description', 'expanded', 'visible', 'children'];
+    var metaProps = {};
+    Object.keys(l).map(function(propName) {
+        if (propsNames.indexOf(propName) + 1) {
+            return;
+        } else {
+            metaProps[propName] = {
+                'Type': capitalize(typeof l[propName]),
+                'Value': l[propName]
+            };
+        }
+    });
+    return metaProps;
+}
+
+// TODO: REFACTOR REFACTOR REFACTOR
+
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 cm.define('rawTree', ['gmxMap'], function(cm) {
     return cm.get('gmxMap').getRawTree();
@@ -278,20 +284,42 @@ cm.define('baseLayersManager', ['map', 'config', 'rawTree', 'permalinkManager'],
     var rawTree = cm.get('rawTree');
     var permalinkManager = cm.get('permalinkManager');
 
-    var baseLayers = JSON.parse(rawTree.properties.BaseLayers);
     if (!map.gmxBaseLayersManager) {
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
         return false;
     }
-    map.gmxBaseLayersManager.initDefaults({
-        apiKey: config.app.gmxMap.apiKey
-    }).then(function() {
-        if (baseLayers && baseLayers.length) {
-            map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
-        }
-        permalinkManager && permalinkManager.setIdentity('baseLayersManager', map.gmxBaseLayersManager);
-        cb(map.gmxBaseLayersManager);
-    });
+
+    if (config.map && config.map.baseLayers) {
+        var ids = config.map.baseLayers.map(function (baseLayer) {
+            var id = baseLayer.id || 'base' + _.uniqueId();
+            baseLayer.MetaProperties = createMeta(baseLayer);
+            map.gmxBaseLayersManager.add(id, {
+                layers: [L.gmx.createLayer({
+                    properties: baseLayer
+                })],
+                eng: typeof baseLayer.title === 'object' ? baseLayer.title.eng : baseLayer.title,
+                rus: typeof baseLayer.title === 'object' ? baseLayer.title.rus : baseLayer.title,
+                icon: baseLayer.iconUrl
+            });
+            return id;
+        }.bind(this));
+
+        map.gmxBaseLayersManager.setActiveIDs(ids);
+        map.gmxBaseLayersManager.setCurrentID(ids[ids.length - 1]);
+
+        return map.gmxBaseLayersManager;
+    } else {
+        var baseLayers = JSON.parse(rawTree.properties.BaseLayers);
+        map.gmxBaseLayersManager.initDefaults({
+            apiKey: config.app.gmxMap.apiKey
+        }).then(function() {
+            if (baseLayers && baseLayers.length) {
+                map.gmxBaseLayersManager.setActiveIDs(baseLayers).setCurrentID(baseLayers[0]);
+            }
+            permalinkManager && permalinkManager.setIdentity('baseLayersManager', map.gmxBaseLayersManager);
+            cb(map.gmxBaseLayersManager);
+        });
+    }
 });
 
 cm.define('drawingManager', ['permalinkManager', 'map'], function(cm, cb) {
