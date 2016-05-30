@@ -10,36 +10,45 @@ window.nsGmx = nsGmx || {};
         },
 
         onAdd: function(map) {
-            var mapId = this.options.gmxId.split(':')[0];
-            var layerId = this.options.gmxId.split(':')[1];
             this._layerIsVisible = true;
-            if (!this._actualLayer) {
-                L.gmx.loadLayer(mapId, layerId).then(function(layer) {
-                    this._actualLayer = layer;
-                    this._updateLayerVisibility(map);
-                }.bind(this), function (err) {
-                    console.error(err);
-                }.bind(this))
-            } else {
-                this._updateLayerVisibility(map);
-            }
+            this._ensureLayer().then(function(layer) {
+                this._updateLayerVisibility(map, layer);
+            }.bind(this), this._handleLayerError.bind(this));
         },
 
         onRemove: function(map) {
             this._layerIsVisible = false;
-            this._updateLayerVisibility(map);
+            this._ensureLayer().then(function(layer) {
+                this._updateLayerVisibility(map, layer);
+            }.bind(this), this._handleLayerError.bind(this));
         },
 
-        setDateInterval: function () {
-            this._actualLayer && this._actualLayer.setDateInterval.apply(this._actualLayer, arguments);
+        setDateInterval: function() {
+            var args = arguments;
+            this._ensureLayer().then(function(layer) {
+                layer.setDateInterval.apply(layer, args);
+            }.bind(this), this._handleLayerError.bind(this));
         },
 
-        _updateLayerVisibility: function() {
-            if (this._layerIsVisible) {
-                this._actualLayer && map.addLayer(this._actualLayer);
-            } else {
-                this._actualLayer && map.removeLayer(this._actualLayer);
+        _ensureLayer: function() {
+            if (!this._pCreateLayer) {
+                var mapId = this.options.gmxId.split(':')[0];
+                var layerId = this.options.gmxId.split(':')[1];
+                this._pCreateLayer = L.gmx.loadLayer(mapId, layerId);
             }
+            return this._pCreateLayer;
+        },
+
+        _updateLayerVisibility: function(map, layer) {
+            if (this._layerIsVisible) {
+                map.addLayer(layer);
+            } else {
+                map.removeLayer(layer);
+            }
+        },
+
+        _handleLayerError: function (err) {
+            console.error(err);
         }
     });
 
