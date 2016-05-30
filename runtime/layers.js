@@ -120,14 +120,19 @@ cm.define('layersClusters', ['layersHash', 'resetter', 'config', 'map'], functio
                         this.options.layersConfig[layerId].clusters
                     )
                 );
-                layer._clusters.externalLayer.on('spiderfied', function(ev) {
-                    this.fire('spiderfied', ev);
-                }.bind(this));
-                layer._clusters.externalLayer.on('unspiderfied', function(ev) {
-                    this.fire('unspiderfied', ev);
-                }.bind(this));
+
+                // !!! HACK: HACK: HACK: !!! REFACTOR ME PLEASE
+
+                if (layer._clusters) {
+                    // simple gmx layer
+                    this._bindClusterEvents(layer);
+                } else if (layer._ensureLayer) {
+                    // virtual gmx layer
+                    layer._ensureLayer().then(this._bindClusterEvents.bind(this));
+                }
             }.bind(this));
         },
+
         reset: function() {
             _.mapObject(this.options.layersHash, function(layer, layerId) {
                 // TODO: don't use private properties
@@ -135,6 +140,15 @@ cm.define('layersClusters', ['layersHash', 'resetter', 'config', 'map'], functio
                     layer._clusters.externalLayer &&
                     layer._clusters.externalLayer._unspiderfy &&
                     layer._clusters.externalLayer._unspiderfy()
+            }.bind(this));
+        },
+
+        _bindClusterEvents: function (layer) {
+            layer._clusters.externalLayer.on('spiderfied', function(ev) {
+                this.fire('spiderfied', ev);
+            }.bind(this));
+            layer._clusters.externalLayer.on('unspiderfied', function(ev) {
+                this.fire('unspiderfied', ev);
             }.bind(this));
         }
     }))({
