@@ -125,7 +125,7 @@ cm.define('balloonsSerializer', ['permalinkManager', 'layersHash', 'map'], funct
 
 cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
     var config = cm.get('config');
-    var intl = cm.get('i18n');
+    var i18n = cm.get('i18n');
 
     if (!L.gmx || !L.gmx.loadMap) {
         return false;
@@ -146,78 +146,23 @@ cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
         });
     } else if (config.map) {
         // debugger;
-        cb(parseMapConfig(config.map));
-    } else {
-        cb(createEmptyMap());
-    }
-
-    function parseMapConfig(mapConfig) {
-        // everything except of this will be in MetaProperties
-        var propsNames = ['id', 'type', 'title', 'description', 'expanded', 'visible', 'children'];
-
         var layersHash = {};
-        var rawTree = rParseMapConfig({
-            id: 'map',
-            title: 'map',
-            children: mapConfig.layers
-        });
-
-        function rParseMapConfig(l) {
-            if (!l) {
-                return;
-            }
-
-            var props = {};
-            Object.keys(l).map(function(propName) {
-                if (propsNames.indexOf(propName) + 1) {
-                    props[propName] = l[propName];
-                }
-            })
-
-            props.title = typeof props.title === 'object' ? props.title[intl.getLanguage()] : props.title;
-            props.description = typeof props.description === 'object' ? props.description[intl.getLanguage()] : props.description;
-
-            if (l.children) {
-                var id = l.id || l.gmxId || 'group' + _.uniqueId();
-                props.GroupID = id;
-                props.name = id;
-            } else {
-                var id = l.id || l.gmxId || 'layer' + _.uniqueId();
-                props.LayerID = id;
-                props.name = id;
-            }
-
-            props.MetaProperties = createMeta(l);
-
+        var rawTree = nsGmx.gmxTreeParser.createRawTree(config.map, i18n.getLanguage());
+        nsGmx.gmxTreeParser.walkRawTree(rawTree, function (props) {
             layersHash[props.name] = L.gmx.createLayer({
                 properties: props
             });
-
-            return {
-                type: l.children ? 'group' : 'layer',
-                content: {
-                    properties: props,
-                    children: l.children && l.children.map(function(c) {
-                        return rParseMapConfig(c);
-                    }),
-                    geometry: null
-                }
-            }
-        }
-
-        return {
+        });
+        cb({
             getRawTree: function() {
-                return {
-                    properties: {
-                        BaseLayers: '[]'
-                    },
-                    children: rawTree.content.children
-                }
+                return rawTree;
             },
             getLayersHash: function() {
                 return layersHash;
             }
-        }
+        });
+    } else {
+        cb(createEmptyMap());
     }
 
     function createEmptyMap(err) {
@@ -238,28 +183,6 @@ cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
     }
 });
 
-function createMeta(l) {
-    var propsNames = ['id', 'type', 'title', 'description', 'expanded', 'visible', 'children'];
-    var metaProps = {};
-    Object.keys(l).map(function(propName) {
-        if (propsNames.indexOf(propName) + 1) {
-            return;
-        } else {
-            metaProps[propName] = {
-                'Type': capitalize(typeof l[propName]),
-                'Value': l[propName]
-            };
-        }
-    });
-    return metaProps;
-}
-
-// TODO: REFACTOR REFACTOR REFACTOR
-
-function capitalize(str) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 cm.define('rawTree', ['gmxMap'], function(cm) {
     return cm.get('gmxMap').getRawTree();
 });
@@ -278,11 +201,12 @@ cm.define('gmxMapErrorHandler', ['gmxMap', 'logger'], function(cm) {
     return null;
 });
 
-cm.define('baseLayersManager', ['map', 'config', 'rawTree', 'permalinkManager'], function(cm, cb) {
-    var map = cm.get('map');
-    var config = cm.get('config');
-    var rawTree = cm.get('rawTree');
+cm.define('baseLayersManager', ['map', 'i18n', 'config', 'rawTree', 'permalinkManager'], function(cm, cb) {
     var permalinkManager = cm.get('permalinkManager');
+    var rawTree = cm.get('rawTree');
+    var config = cm.get('config');
+    var i18n = cm.get('i18n');
+    var map = cm.get('map');
 
     if (!map.gmxBaseLayersManager) {
         L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(map);
@@ -291,11 +215,9 @@ cm.define('baseLayersManager', ['map', 'config', 'rawTree', 'permalinkManager'],
 
     if (config.map && config.map.baseLayers) {
         var ids = config.map.baseLayers.map(function (baseLayer) {
-            var id = baseLayer.id || 'base' + _.uniqueId();
-            baseLayer.MetaProperties = createMeta(baseLayer);
             map.gmxBaseLayersManager.add(id, {
                 layers: [L.gmx.createLayer({
-                    properties: baseLayer
+                    properties: nsGmx.gmxTreeParser.createLayerProperties(baseLayer, i18n.getLanguage())
                 })],
                 eng: typeof baseLayer.title === 'object' ? baseLayer.title.eng : baseLayer.title,
                 rus: typeof baseLayer.title === 'object' ? baseLayer.title.rus : baseLayer.title,

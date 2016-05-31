@@ -12,6 +12,7 @@ gulp.task('js', function() {
             'lib/FullscreenControlMixin.js',
             'lib/FullscreenPagingPaneControl.js',
             'lib/MobileButtonsPaneControl.js',
+            'lib/gmxTreeParser.js',
             'layers/GmxVectorVirtualLayer.js',
             'runtime/_header.js',
             'runtime/core.js',
