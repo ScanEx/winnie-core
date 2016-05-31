@@ -13,7 +13,6 @@ gulp.task('js', function() {
             'lib/FullscreenPagingPaneControl.js',
             'lib/MobileButtonsPaneControl.js',
             'lib/gmxTreeParser.js',
-            'layers/GmxVectorVirtualLayer.js',
             'runtime/_header.js',
             'runtime/core.js',
             'runtime/map.js',

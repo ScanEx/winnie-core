@@ -147,19 +147,20 @@ cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
     } else if (config.map) {
         // debugger;
         var layersHash = {};
-        var rawTree = nsGmx.gmxTreeParser.createRawTree(config.map, i18n.getLanguage());
-        nsGmx.gmxTreeParser.walkRawTree(rawTree, function (props) {
-            layersHash[props.name] = L.gmx.createLayer({
-                properties: props
+        nsGmx.gmxTreeParser.createRawTree(config.map, i18n.getLanguage()).then(function (rawTree) {
+            nsGmx.gmxTreeParser.walkRawTree(rawTree, function (props) {
+                layersHash[props.name] = L.gmx.createLayer({
+                    properties: props
+                });
             });
-        });
-        cb({
-            getRawTree: function() {
-                return rawTree;
-            },
-            getLayersHash: function() {
-                return layersHash;
-            }
+            cb({
+                getRawTree: function() {
+                    return rawTree;
+                },
+                getLayersHash: function() {
+                    return layersHash;
+                }
+            });
         });
     } else {
         cb(createEmptyMap());
