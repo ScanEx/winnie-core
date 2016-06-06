@@ -26,6 +26,12 @@ cm.define('layersTree', ['rawTree', 'permalinkManager'], function(cm) {
         var layersTree = new nsGmx.LayersTreeNode({
             content: rawTree
         });
+
+        // fix layers tree if (if it was created manually)
+        layersTree.eachNode(function (node) {
+            node.setNodeVisibility(node.get('visible'));
+        });
+
         permalinkManager && permalinkManager.setIdentity('layersTree', layersTree);
         return layersTree;
     } else {
