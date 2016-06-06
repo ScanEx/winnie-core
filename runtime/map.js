@@ -145,20 +145,13 @@ cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
             cb(createEmptyMap(err));
         });
     } else if (config.map) {
-        // debugger;
-        var layersHash = {};
-        nsGmx.gmxTreeParser.createRawTree(config.map, i18n.getLanguage()).then(function (rawTree) {
-            nsGmx.gmxTreeParser.walkRawTree(rawTree, function (props) {
-                layersHash[props.name] = L.gmx.createLayer({
-                    properties: props
-                });
-            });
+        nsGmx.gmxTreeParser.parse(config.map, i18n.getLanguage()).then(function (res) {
             cb({
                 getRawTree: function() {
-                    return rawTree;
+                    return res.rawTree;
                 },
                 getLayersHash: function() {
-                    return layersHash;
+                    return res.layersHash;
                 }
             });
         });
