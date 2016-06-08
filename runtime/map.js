@@ -1,4 +1,4 @@
-cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], function(cm, cb) {
+ cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], function(cm, cb) {
     var container = cm.get('container');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
@@ -145,16 +145,21 @@ cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
             cb(createEmptyMap(err));
         });
     } else if (config.map) {
-        nsGmx.gmxTreeParser.parse(config.map, i18n.getLanguage()).then(function (res) {
-            cb({
-                getRawTree: function() {
-                    return res.rawTree;
-                },
-                getLayersHash: function() {
-                    return res.layersHash;
-                }
+        try {
+            nsGmx.gmxTreeParser.parse(config.map, i18n.getLanguage()).then(function(res) {
+                cb({
+                    getRawTree: function() {
+                        return res.rawTree;
+                    },
+                    getLayersHash: function() {
+                        return res.layersHash;
+                    }
+                });
             });
-        });
+        } catch (e) {
+            console.error(e);
+            cb(createEmptyMap());
+        }
     } else {
         cb(createEmptyMap());
     }
@@ -208,7 +213,7 @@ cm.define('baseLayersManager', ['map', 'i18n', 'config', 'rawTree', 'permalinkMa
     }
 
     if (config.map && config.map.baseLayers) {
-        var ids = config.map.baseLayers.map(function (baseLayer) {
+        var ids = config.map.baseLayers.map(function(baseLayer) {
             map.gmxBaseLayersManager.add(id, {
                 layers: [L.gmx.createLayer({
                     properties: nsGmx.gmxTreeParser.createLayerProperties(baseLayer, i18n.getLanguage())
