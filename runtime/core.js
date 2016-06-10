@@ -186,10 +186,18 @@ cm.define('logger', [], function(cm) {
 cm.define('datepickerFix', [], function(cm) {
     // HACK: leaflet controls overlap datepicker @ set z-index more than leaflet control's
     // (cannot change datepicker's container or override z-index)
+    var fixed = false;
     $.datepicker.setDefaults({
-        beforeShow: function() {
+        beforeShow: function(input, instance) {
+            var dpDiv = instance.dpDiv;
+            if (!fixed) {
+                dpDiv.on('click', function (je) {
+                    je.stopPropagation();
+                });
+                fixed = true;
+            }
             setTimeout(function() {
-                $('#ui-datepicker-div').css('z-index', '1001');
+                dpDiv.css('z-index', '1001');
             }, 10);
         }
     });
