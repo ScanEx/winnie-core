@@ -96,7 +96,7 @@ cm.define('layersMapper', ['config', 'map', 'layersHash', 'layersTree'], functio
     }
 });
 
-cm.define('layersClusters', ['layersHash', 'resetter', 'config', 'map'], function(cm) {
+cm.define('layersClusters', ['layersHash', 'layersMapper', 'resetter', 'config', 'map'], function(cm) {
     var layersHash = cm.get('layersHash');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
@@ -127,15 +127,12 @@ cm.define('layersClusters', ['layersHash', 'resetter', 'config', 'map'], functio
                     )
                 );
 
-                // !!! HACK: HACK: HACK: !!! REFACTOR ME PLEASE
-
-                if (layer._clusters) {
-                    // simple gmx layer
-                    this._bindClusterEvents(layer);
-                } else if (layer._ensureLayer) {
-                    // virtual gmx layer
-                    layer._ensureLayer().then(this._bindClusterEvents.bind(this));
-                }
+                layer._clusters.externalLayer.on('spiderfied', function(ev) {
+                    this.fire('spiderfied', ev);
+                }.bind(this));
+                layer._clusters.externalLayer.on('unspiderfied', function(ev) {
+                    this.fire('unspiderfied', ev);
+                }.bind(this));
             }.bind(this));
         },
 
@@ -146,15 +143,6 @@ cm.define('layersClusters', ['layersHash', 'resetter', 'config', 'map'], functio
                     layer._clusters.externalLayer &&
                     layer._clusters.externalLayer._unspiderfy &&
                     layer._clusters.externalLayer._unspiderfy()
-            }.bind(this));
-        },
-
-        _bindClusterEvents: function (layer) {
-            layer._clusters.externalLayer.on('spiderfied', function(ev) {
-                this.fire('spiderfied', ev);
-            }.bind(this));
-            layer._clusters.externalLayer.on('unspiderfied', function(ev) {
-                this.fire('unspiderfied', ev);
             }.bind(this));
         }
     }))({
