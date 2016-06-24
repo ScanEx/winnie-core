@@ -20,12 +20,15 @@
     return map;
 });
 
-cm.define('mapActiveArea', ['map'], function(cm) {
-    if (!cm.get('map').setActiveArea) {
+cm.define('mapActiveArea', ['config', 'map'], function(cm) {
+    var config = cm.get('config');
+    var cfg = config.app && config.app.mapActiveArea;
+
+    if (!cm.get('map').setActiveArea || cfg === false) {
         return false;
     }
 
-    return new(L.Class.extend({
+    var laa = new(L.Class.extend({
         initialize: function(options) {
             this.options = L.setOptions(this, options);
             this.resetActiveArea();
@@ -46,6 +49,12 @@ cm.define('mapActiveArea', ['map'], function(cm) {
     }))({
         map: cm.get('map')
     });
+
+    if (cfg.top || cfg.bottom || cfg.left || cfg.right) {
+        laa.setActiveArea(cfg);
+    }
+
+    return laa;
 });
 
 // TODO: use controls manager
