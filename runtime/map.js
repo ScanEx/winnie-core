@@ -50,7 +50,7 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
         map: cm.get('map')
     });
 
-    if (cfg.top || cfg.bottom || cfg.left || cfg.right) {
+    if (cfg && (cfg.top || cfg.bottom || cfg.left || cfg.right)) {
         laa.setActiveArea(cfg);
     }
 
