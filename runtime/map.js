@@ -1,4 +1,4 @@
- cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], function(cm, cb) {
+cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], function(cm, cb) {
     var container = cm.get('container');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
@@ -29,30 +29,56 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
     }
 
     var laa = new(L.Class.extend({
+        options: {
+            initialConstraints: {
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 10
+            }
+        },
+
         initialize: function(options) {
             this.options = L.setOptions(this, options);
-            this.resetActiveArea();
+            this._updateActiveArea();
         },
-        setActiveArea: function() {
-            this.options.map.setActiveArea.apply(this.options.map, arguments);
+
+        addAffect: function(id, props) {
+            this._affects[id] = props;
+            this._updateActiveArea();
         },
-        resetActiveArea: function() {
-            this.setActiveArea({
+
+        removeAffect: function(id) {
+            delete this._affects[id];
+            this._updateActiveArea();
+        },
+
+        _updateActiveArea: function() {
+            var ao = Object.keys(this._affects).map(function(affectId) {
+                return this._affects[affectId]
+            }).reduce(function(prev, curr) {
+                return sum(prev, curr)
+            }, this.options.initialConstraints)
+
+            this.options.map.setActiveArea(L.extend({
                 position: 'absolute',
-                border: '1 px solid red',
-                left: '0',
-                top: '0',
-                bottom: '0',
-                right: '0'
-            });
+                border: '1px solid red'
+            }, ao));
+
+            function sum(a, b) {
+                var o = {};
+                ['top', 'left', 'bottom', 'right'].map(function(direction) {
+                    var da = (a[direction].match(/\d+/) && a[direction].match(/\d+/)[0]) || 0;
+                    var db = (a[direction].match(/\d+/) && a[direction].match(/\d+/)[0]) || 0;
+                    o[direction] = (da + db) + 'px';
+                });
+                return o;
+            }
         }
     }))({
-        map: cm.get('map')
+        map: cm.get('map'),
+        initialConstraints: cfg
     });
-
-    if (cfg.top || cfg.bottom || cfg.left || cfg.right) {
-        laa.setActiveArea(cfg);
-    }
 
     return laa;
 });
@@ -337,7 +363,7 @@ cm.define('mobilePopups', ['mapLayoutHelper', 'mapActiveArea', 'layersMapper', '
             infoControl.render(balloonHtml);
             infoControl.show();
             mapLayoutHelper.hideBottomControls();
-            mapActiveArea.setActiveArea({
+            mapActiveArea.addAffect('mobilepopup', {
                 bottom: infoControl.getContainer().scrollHeight + 'px'
             });
             map.setView(ev.latlng);
@@ -349,7 +375,7 @@ cm.define('mobilePopups', ['mapLayoutHelper', 'mapActiveArea', 'layersMapper', '
         if (popupIsActive) {
             infoControl.hide();
             mapLayoutHelper.showBottomControls();
-            mapActiveArea.resetActiveArea();
+            mapActiveArea.removeAffect('mobilepopup');
         }
         evBus.fire('hidden');
     });

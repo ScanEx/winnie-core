@@ -51,7 +51,8 @@ function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, bu
     return scrollView;
 }
 
-cm.define('sidebarWidget', ['container', 'resetter', 'config', 'map'], function(cm) {
+cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 'map'], function(cm) {
+    var mapActiveArea = cm.get('mapActiveArea');
     var rootContainer = cm.get('container');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
