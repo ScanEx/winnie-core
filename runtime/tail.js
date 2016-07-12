@@ -6,11 +6,6 @@ cm.define('debug', ['layersTree', 'layersHash', 'calendar', 'rawTree', 'config',
         return null;
     }
 
-    debugCfg = L.extend({
-        globals: true,
-        layersTree: true
-    });
-
     if (debugCfg.globals) {
         window.cal = cm.get('calendar');
         window.lt = cm.get('layersTree');
