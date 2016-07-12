@@ -35,11 +35,14 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
                 bottom: 10,
                 left: 10,
                 right: 10
-            }
+            },
+
+            showBorder: false
         },
 
         initialize: function(options) {
             this.options = L.setOptions(this, options);
+            this._affects = {};
             this._updateActiveArea();
         },
 
@@ -62,7 +65,7 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
 
             this.options.map.setActiveArea(L.extend({
                 position: 'absolute',
-                border: '1px solid red'
+                border: this.options.showBorder ? '1px solid red' : 'none'
             }, ao));
 
             function sum(a, b) {
@@ -75,10 +78,9 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
                 return o;
             }
         }
-    }))({
-        map: cm.get('map'),
-        initialConstraints: cfg
-    });
+    }))(L.extend(cfg, {
+        map: cm.get('map')
+    }));
 
     return laa;
 });
