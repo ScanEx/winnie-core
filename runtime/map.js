@@ -80,7 +80,7 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
                 return o;
             }
         }
-    }))(L.extend(cfg, {
+    }))(L.extend(cfg || {}, {
         map: cm.get('map')
     }));
 
