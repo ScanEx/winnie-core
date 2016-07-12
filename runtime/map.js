@@ -59,7 +59,7 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
         _updateActiveArea: function() {
             var ao = Object.keys(this._affects).map(function(affectId) {
                 return this._affects[affectId]
-            }).reduce(function(prev, curr) {
+            }.bind(this)).reduce(function(prev, curr) {
                 return sum(prev, curr)
             }, this.options.initialConstraints)
 
@@ -71,9 +71,11 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
             function sum(a, b) {
                 var o = {};
                 ['top', 'left', 'bottom', 'right'].map(function(direction) {
+                    a[direction] = a[direction] + '';
                     var da = (a[direction].match(/\d+/) && a[direction].match(/\d+/)[0]) || 0;
-                    var db = (a[direction].match(/\d+/) && a[direction].match(/\d+/)[0]) || 0;
-                    o[direction] = (da + db) + 'px';
+                    b[direction] = b[direction] + '';
+                    var db = (b[direction].match(/\d+/) && b[direction].match(/\d+/)[0]) || 0;
+                    o[direction] = (da / 1 + db / 1) + 'px';
                 });
                 return o;
             }

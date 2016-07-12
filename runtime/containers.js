@@ -42,7 +42,7 @@ function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, bu
         fullscreenPagingPane.showView(viewId);
     });
 
-    fullscreenPagingPane.on('showview', function () {
+    fullscreenPagingPane.on('showview', function() {
         scrollView.repaint();
     });
 
@@ -65,6 +65,41 @@ cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 
         var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
         sidebarControl.addTo(map);
 
+        function addSidebarInitialAffect() {
+            if (config.app.sidebarWidget.position === 'left') {
+                mapActiveArea.addAffect('sidebar-widget', {
+                    left: '60px'
+                })
+            } else {
+                mapActiveArea.addAffect('sidebar-widget', {
+                    right: '60px'
+                })
+            }
+        }
+
+        function removeSidebarInitialAffect() {
+            mapActiveArea.removeAffect('sidebar-widget');
+        }
+
+        function addSidebarOpenedAffect() {
+            var width = $(sidebarControl.getContainer()).outerWidth()
+            if (config.app.sidebarWidget.position === 'left') {
+                mapActiveArea.addAffect('sidebar-widget-opened', {
+                    left: width + 20
+                })
+            } else {
+                mapActiveArea.addAffect('sidebar-widget-opened', {
+                    right: width + 20
+                })
+            }
+        }
+
+        function removeSidebarOpenedAffect() {
+            mapActiveArea.removeAffect('sidebar-widget-opened')
+        }
+
+        addSidebarInitialAffect();
+
         sidebarControl.on('opening', function() {
             resetter.reset();
         });
@@ -75,10 +110,14 @@ cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 
 
         sidebarControl.on('opened', function(ev) {
             $(rootContainer).addClass('gmxApplication_sidebarShift');
+            removeSidebarInitialAffect();
+            addSidebarOpenedAffect();
         });
 
         sidebarControl.on('closing', function() {
             $(rootContainer).removeClass('gmxApplication_sidebarShift');
+            removeSidebarOpenedAffect();
+            addSidebarInitialAffect();
         });
 
         if (nsGmx.Utils.isMobile()) {
@@ -116,8 +155,8 @@ cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 
 cm.define('fullscreenPagingPane', ['map'], function() {
     var map = cm.get('map');
 
-    var fullscreenPagingPane = new (nsGmx.FullscreenPagingPaneControl.extend({
-        hideView: function () {
+    var fullscreenPagingPane = new(nsGmx.FullscreenPagingPaneControl.extend({
+        hideView: function() {
             nsGmx.FullscreenPagingPaneControl.prototype.hideView.apply(this, arguments);
             var mbpc = cm.get('mobileButtonsPaneControl');
             mbpc && mbpc.showView('main');
