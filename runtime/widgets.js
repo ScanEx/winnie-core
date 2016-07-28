@@ -65,7 +65,7 @@ cm.define('storytellingWidget', ['permalinkManager', 'rawTree', 'config', 'map']
             nsGmx.StorytellingAccordeonControl :
             nsGmx.StorytellingControl;
 
-        var storytellingControl = new StorytellingControlClass(L.extend(config.app.storytellingWidget, {
+        var storytellingControl = new StorytellingControlClass(L.extend({}, config.app.storytellingWidget, {
             bookmarks: rawTree.properties.UserData && JSON.parse(rawTree.properties.UserData).tabs
         }));
 
