@@ -5,7 +5,7 @@ cm.define('baseLayersControl', ['baseLayersManager', 'config', 'i18n', 'map'], f
     var map = cm.get('map');
 
     if (config.app.baseLayersControl && L.Control.GmxIconLayers) {
-        var ctrl = new L.Control.GmxIconLayers(baseLayersManager, L.extend(config.app.baseLayersControl, {
+        var ctrl = new L.Control.GmxIconLayers(baseLayersManager, L.extend({}, config.app.baseLayersControl, {
             language: i18n.getLanguage()
         }));
         map.addControl(ctrl);
