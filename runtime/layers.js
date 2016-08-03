@@ -77,6 +77,7 @@ cm.define('layersMapper', ['config', 'map', 'layersHash', 'layersTree'], functio
                 return;
             }
             if (model.get('visible')) {
+                this._layersHash[id].removeFilter && this._layersHash[id].removeFilter();
                 this._map.addLayer(this._layersHash[id]);
             } else {
                 this._map.removeLayer(this._layersHash[id]);
