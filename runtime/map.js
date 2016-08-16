@@ -58,12 +58,7 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
 
         _redrawMap: function () {
             // HACK: force redraw map to update objects that must be displayed or hidden
-            var map = this.options.map
-            var center = map.getCenter()
-            var zoom = map.getZoom()
-            var df = 0.0000001
-            map.setView([center.lat - df, center.lng - df], zoom, { animate: false })
-            map.setView([center.lat + df, center.lng + df], zoom, { animate: false })
+            this.options.map.fire('moveend')
         },
 
         _updateActiveArea: function() {
