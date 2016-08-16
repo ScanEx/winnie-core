@@ -61,7 +61,7 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
             var map = this.options.map
             var center = map.getCenter()
             var zoom = map.getZoom()
-            var df = 0.0001
+            var df = 0.0000001
             map.setView([center.lat - df, center.lng - df], zoom, { animate: false })
             map.setView([center.lat + df, center.lng + df], zoom, { animate: false })
         },
