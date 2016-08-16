@@ -56,6 +56,16 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
             this._updateActiveArea();
         },
 
+        _redrawMap: function () {
+            // HACK: force redraw map to update objects that must be displayed or hidden
+            var map = this.options.map
+            var center = map.getCenter()
+            var zoom = map.getZoom()
+            var df = 0.0001
+            map.setView([center.lat - df, center.lng - df], zoom, { animate: false })
+            map.setView([center.lat + df, center.lng + df], zoom, { animate: false })
+        },
+
         _updateActiveArea: function() {
             var ao = Object.keys(this._affects).map(function(affectId) {
                 return this._affects[affectId]
@@ -67,6 +77,8 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
                 position: 'absolute',
                 border: this.options.showBorder ? '1px solid red' : 'none'
             }, ao));
+
+            this._redrawMap()
 
             function sum(a, b) {
                 var o = {};
