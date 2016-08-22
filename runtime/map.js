@@ -42,7 +42,9 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
 
         initialize: function(options) {
             this.options = L.setOptions(this, options);
-            this._affects = {};
+            this._affects = {
+                initialConstraints: this.options.initialConstraints
+            }
             this._updateActiveArea();
         },
 
@@ -66,7 +68,12 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
                 return this._affects[affectId]
             }.bind(this)).reduce(function(prev, curr) {
                 return sum(prev, curr)
-            }, this.options.initialConstraints)
+            }, {
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0
+            })
 
             this.options.map.setActiveArea(L.extend({
                 position: 'absolute',
