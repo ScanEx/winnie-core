@@ -67,35 +67,35 @@ cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 
 
         function addSidebarInitialAffect() {
             if (config.app.sidebarWidget.position === 'left') {
-                mapActiveArea.addAffect('sidebar-widget', {
+                mapActiveArea && mapActiveArea.addAffect('sidebar-widget', {
                     left: '60px'
                 })
             } else {
-                mapActiveArea.addAffect('sidebar-widget', {
+                mapActiveArea && mapActiveArea.addAffect('sidebar-widget', {
                     right: '60px'
                 })
             }
         }
 
         function removeSidebarInitialAffect() {
-            mapActiveArea.removeAffect('sidebar-widget');
+            mapActiveArea && mapActiveArea.removeAffect('sidebar-widget');
         }
 
         function addSidebarOpenedAffect() {
             var width = $(sidebarControl.getContainer()).outerWidth()
             if (config.app.sidebarWidget.position === 'left') {
-                mapActiveArea.addAffect('sidebar-widget-opened', {
+                mapActiveArea && mapActiveArea.addAffect('sidebar-widget-opened', {
                     left: width + 20
                 })
             } else {
-                mapActiveArea.addAffect('sidebar-widget-opened', {
+                mapActiveArea && mapActiveArea.addAffect('sidebar-widget-opened', {
                     right: width + 20
                 })
             }
         }
 
         function removeSidebarOpenedAffect() {
-            mapActiveArea.removeAffect('sidebar-widget-opened')
+            mapActiveArea && mapActiveArea.removeAffect('sidebar-widget-opened')
         }
 
         addSidebarInitialAffect();

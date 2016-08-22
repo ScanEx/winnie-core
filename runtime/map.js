@@ -25,7 +25,7 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
     var cfg = config.app && config.app.mapActiveArea;
 
     if (!cm.get('map').setActiveArea || cfg === false) {
-        return false;
+        return null;
     }
 
     var laa = new(L.Class.extend({
