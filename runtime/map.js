@@ -49,13 +49,13 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
         },
 
         addAffect: function(id, props) {
-            // this._affects[id] = props;
-            // this._updateActiveArea();
+            this._affects[id] = props;
+            this._updateActiveArea();
         },
 
         removeAffect: function(id) {
-            // delete this._affects[id];
-            // this._updateActiveArea();
+            delete this._affects[id];
+            this._updateActiveArea();
         },
 
         _redrawMap: function () {
