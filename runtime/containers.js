@@ -51,22 +51,97 @@ function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, bu
     return scrollView;
 }
 
-cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 'map'], function(cm) {
-    var mapActiveArea = cm.get('mapActiveArea');
-    var rootContainer = cm.get('container');
+cm.define('sidebarWidget', ['container', 'resetter', 'config', 'map'], function(cm) {
     var resetter = cm.get('resetter');
     var config = cm.get('config');
     var map = cm.get('map')
 
-    if (config.app.sidebarWidget && nsGmx.IconSidebarControl) {
-        var position = config.app.sidebarWidget.position || 'right';
-        L.DomUtil.addClass(rootContainer, position === 'right' ? 'gmxApplication_withRightSidebar' : 'gmxApplication_withLeftSidebar');
+    if (!config.app.sidebarWidget || !nsGmx.IconSidebarControl) {
+        return null
+    }
 
-        var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
-        sidebarControl.addTo(map);
+    var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
+    sidebarControl.addTo(map);
 
-        function addSidebarInitialAffect() {
-            if (config.app.sidebarWidget.position === 'left') {
+    sidebarControl.on('opening', function() {
+        resetter.reset();
+    });
+
+    sidebarControl.on('closing', function() {
+        resetter.reset();
+    });
+
+    if (nsGmx.Utils.isMobile()) {
+        sidebarControl.setMode('mobile');
+    }
+
+    sidebarControl.on('stick', function(e) {
+        [
+            cm.get('baseLayersControl'),
+            cm.get('logoControl'),
+            cm.get('hideControl'),
+            cm.get('zoomControl'),
+            cm.get('centerControl'),
+            cm.get('bottomControl'),
+            cm.get('locationControl'),
+            cm.get('copyrightControl'),
+            cm.get('loaderStatusControl'),
+            map.zoomControl,
+            map.attributionControl
+        ].map(function(ctrl) {
+            if (e.isStuck) {
+                ctrl && L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
+            } else {
+                ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
+            }
+            resetter.reset();
+        });
+    });
+
+    return sidebarControl;
+});
+
+cm.define('sidebarAffects', ['config', 'container', 'mapActiveArea', 'sidebarWidget'], function (cm) {
+    var sidebarControl = cm.get('sidebarWidget')
+    var mapActiveArea = cm.get('mapActiveArea')
+    var rootContainer = cm.get('container')
+    var config = cm.get('config')
+
+    var position = config.app.sidebarWidget.position || 'right';
+
+    if (!sidebarControl) {
+        return null
+    }
+
+    return new (L.Class.extend({
+        initialize: function(options) {
+            sidebarControl.on('opened closing', this.update, this)
+            this.enable()
+        },
+
+        enable: function () {
+            this._enabled = true
+            this.update()
+        },
+
+        disable: function () {
+            this._enabled = false
+            this.update()
+        },
+
+        update: function (ev) {
+            if (!this._enabled) {
+                this.removeSidebarOpenedAffect()
+                this.removeSidebarInitialAffect()
+            } else {
+                this.addSidebarInitialAffect()
+                !sidebarControl.isOpened() || (ev && ev.type === 'closing') ? this.removeSidebarOpenedAffect() : this.addSidebarOpenedAffect()
+            }
+        },
+
+        addSidebarInitialAffect: function() {
+            L.DomUtil.addClass(rootContainer, position === 'right' ? 'gmxApplication_withRightSidebar' : 'gmxApplication_withLeftSidebar')
+            if (position === 'left') {
                 mapActiveArea.addAffect('sidebar-widget', {
                     left: '60px'
                 })
@@ -75,82 +150,33 @@ cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 
                     right: '60px'
                 })
             }
-        }
+        },
 
-        function removeSidebarInitialAffect() {
+        removeSidebarInitialAffect: function() {
+            L.DomUtil.removeClass(rootContainer, position === 'right' ? 'gmxApplication_withRightSidebar' : 'gmxApplication_withLeftSidebar')
             mapActiveArea.removeAffect('sidebar-widget');
-        }
+        },
 
-        function addSidebarOpenedAffect() {
+        addSidebarOpenedAffect: function() {
+            L.DomUtil.addClass(rootContainer, 'gmxApplication_sidebarShift');
             var width = $(sidebarControl.getContainer()).outerWidth()
             if (config.app.sidebarWidget.position === 'left') {
                 mapActiveArea.addAffect('sidebar-widget-opened', {
-                    left: width + 20
+                    left: width - 50
                 })
             } else {
                 mapActiveArea.addAffect('sidebar-widget-opened', {
-                    right: width + 20
+                    right: width - 50
                 })
             }
-        }
+        },
 
-        function removeSidebarOpenedAffect() {
+        removeSidebarOpenedAffect: function() {
+            L.DomUtil.removeClass(rootContainer, 'gmxApplication_sidebarShift');
             mapActiveArea.removeAffect('sidebar-widget-opened')
         }
-
-        addSidebarInitialAffect();
-
-        sidebarControl.on('opening', function() {
-            resetter.reset();
-        });
-
-        sidebarControl.on('closing', function() {
-            resetter.reset();
-        });
-
-        sidebarControl.on('opened', function(ev) {
-            $(rootContainer).addClass('gmxApplication_sidebarShift');
-            removeSidebarInitialAffect();
-            addSidebarOpenedAffect();
-        });
-
-        sidebarControl.on('closing', function() {
-            $(rootContainer).removeClass('gmxApplication_sidebarShift');
-            removeSidebarOpenedAffect();
-            addSidebarInitialAffect();
-        });
-
-        if (nsGmx.Utils.isMobile()) {
-            sidebarControl.setMode('mobile');
-        }
-
-        sidebarControl.on('stick', function(e) {
-            [
-                cm.get('baseLayersControl'),
-                cm.get('logoControl'),
-                cm.get('hideControl'),
-                cm.get('zoomControl'),
-                cm.get('centerControl'),
-                cm.get('bottomControl'),
-                cm.get('locationControl'),
-                cm.get('copyrightControl'),
-                cm.get('loaderStatusControl'),
-                map.zoomControl,
-                map.attributionControl
-            ].map(function(ctrl) {
-                if (e.isStuck) {
-                    ctrl && L.DomUtil.addClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
-                } else {
-                    ctrl && L.DomUtil.removeClass(ctrl.getContainer(), 'leaflet-control-gmx-hidden');
-                }
-                resetter.reset();
-            });
-        });
-        return sidebarControl;
-    } else {
-        return null;
-    }
-});
+    }))()
+})
 
 cm.define('fullscreenPagingPane', ['map'], function() {
     var map = cm.get('map');
