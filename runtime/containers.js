@@ -75,7 +75,9 @@ cm.define('sidebarWidget', ['container', 'resetter', 'config', 'map'], function(
         return null
     }
 
-    var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
+    var sidebarControl = new nsGmx.IconSidebarControl(L.extend({}, config.app.sidebarWidget, {
+        position: createCustomContainer(map)
+    }));
     sidebarControl.addTo(map);
 
     sidebarControl.on('opening', function() {
@@ -114,6 +116,17 @@ cm.define('sidebarWidget', ['container', 'resetter', 'config', 'map'], function(
     });
 
     return sidebarControl;
+
+    function createCustomContainer(map) {
+        // хак, предназначенный для создания контейнеров для контролов, занимающих весь экран по ширине/высоте
+        const customPosName = `right${L.stamp({})}`
+        const controlCornerEl = L.DomUtil.create('div', 'leaflet-top leaflet-bottom leaflet-right', map._controlContainer)
+        L.DomUtil.addClass(controlCornerEl, 'iconSidebarControl-controlCorner')
+        L.DomEvent.disableClickPropagation(controlCornerEl)
+        L.DomEvent.disableScrollPropagation(controlCornerEl)
+        map._controlCorners[customPosName] = controlCornerEl
+        return customPosName
+    }
 });
 
 cm.define('sidebarAffects', ['config', 'container', 'mapActiveArea', 'sidebarWidget'], function (cm) {
