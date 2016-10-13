@@ -28,3 +28,7 @@ gulp.task('js', function() {
 });
 
 gulp.task('default', ['js', 'css']);
+
+gulp.task('watch', ['default'], function () {
+    gulp.watch(['lib/*', 'runtime/*'], ['default'])
+})
