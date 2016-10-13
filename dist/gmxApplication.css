@@ -1,0 +1,77 @@
+.gmxApplication { z-index: 5; /* less than ui-datepicker's (8) */ }
+
+.gmxApplication-rootContainer { position: relative; width: 100%; height: 100%; }
+.gmxApplication-mapContainer { position: absolute; top: 0; bottom: 0; left: 0; right: 0; z-index: 5; transition: opacity .5s ease; opacity: 1; }
+
+.gmxApplication-centerbsControlCorner { background-color: hsla(0, 0%, 100%, 0); transition: background-color .5s ease; }
+.gmxApplication-centerbsControlCorner-ie9 { } /* в IE9 background не даёт кликнуть по слоям */
+.gmxApplication-centerbsControlCorner-fadeIn { background-color: hsla(0, 0%, 100%, 1); }
+
+.calendarContainer { display: flex; align-items: center; box-sizing: border-box; height: 55px; pointer-events: auto; }
+.calendarContainer { border-radius: 2px; padding: 10px; background: #fff; box-shadow: 0 1px 5px rgba(0, 0, 0, 0.65); }
+
+.gmxApplication_withCalendar .iconSidebarControl-controlCorner { padding-top: 75px; }
+.gmxApplication_withBottomControls .iconSidebarControl-controlCorner { padding-bottom: 30px; }
+
+.gmxApplication-noShadow.calendarContainer { box-shadow: none; }
+
+.infoControl { position: absolute; top: auto; bottom: 0; left: 0; right: 0; background-color: hsla(0, 0%, 100%, .9); box-shadow: 0 0 4px hsla(0, 0%, 0%, .3); }
+.infoControl.leaflet-control { margin: 0; padding: 10px; }
+.infoControl .eventDetailsView-title { font-size: 1.2em; }
+.infoControl_overflow { overflow: scroll; }
+
+.gmxApplication .iconSidebarControl-controlCorner_locked { pointer-events: auto; background-color: hsla(0, 0%, 100%, 0.65); }
+
+.debugWindowControl {
+    position: absolute;
+    background: hsla(0, 0%, 0%, 0.8);
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #fff;
+    padding: 4px 8px;
+    display: none;
+}
+.debugWindowControl-controlCorner { z-index: 9999; }
+.debugWindowControl_active { display: block; }
+
+.gmxApplication_platform-ios .leaflet-top .leaflet-control { margin-top: 25px; }
+
+.fullscreenPagingPaneControl-controlCorner { z-index: 100500; }
+.fullscreenPagingPaneControl.fullscreenPagingPaneControl_fullscreen { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+.fullscreenPagingPaneControl-controlCorner_fullscreen, .fullscreenPagingPaneControl-controlCorner.fullscreenPagingPaneControl_fullscreen { background: #fff; }
+
+.mobileButtonsPaneControl-controlCorner { box-shadow: 0 0 2px hsla(0, 0%, 0%, 0.5); z-index: 100501; }
+.mobileButtonsPaneControl.leaflet-control { background: #fff; margin: 0; width: 100%; height: 50px; }
+.mobileButtonsPaneWidget { height: 100%; width: 100%; display: flex; align-items: center; justify-content: center; }
+
+.gmxApplication_withMobileBar .leaflet-bottom { bottom: 50px; }
+.gmxApplication_withMobileBar .leaflet-bottom.gmx-bottom-shift { bottom: 70px; }
+.gmxApplication_withMobileBar .leaflet-bottom.mobileButtonsPaneControl-controlCorner { bottom: 0; }
+
+.iconButtonWidget { cursor: pointer; font-size: 18px; }
+
+.fullscreenPagingPaneControl_page-calendarWidget { display: flex; align-items: center; justify-content: center; }
+
+.mobileButtonsPaneWidget .iconButtonWidget { padding: 0 10px; }
+
+.leaflet-popup.gmxPopup { max-width: 500px; }
+
+.gmxApplication_withRightSidebar.gmxApplication_sidebarShift .leaflet-right .leaflet-control { margin-right: 325px; }
+.gmxApplication_withRightSidebar.gmxApplication_sidebarShift .leaflet-right.leaflet-left .leaflet-control { margin-right: 0px; }
+
+.gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left .leaflet-control { margin-left: 325px; }
+.gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left.leaflet-right .leaflet-control { margin-left: 0px; }
+
+.gmxApplication_sidebarShift .leaflet-right .calendarContainer.leaflet-control { margin-right: 10px; }
+.gmxApplication_sidebarShift .leaflet-left .calendarContainer.leaflet-control { margin-left: 10px; }
+
+/* HACK: keep bottom gmx controls positions on sidebar opened */
+.gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left .leaflet-control.leaflet-gmx-copyright  { margin-left: 10px; }
+.gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left.leaflet-right .leaflet-control.leaflet-gmx-logo { margin-left: calc(50% - 50px); }
+.gmxApplication_withRightSidebar.gmxApplication_sidebarShift .leaflet-right .leaflet-control.leaflet-gmx-location { margin-right: 10px; }
+
+/* there is a bug in jScrollPane (margin-left without srollbar), so we can't place scrollbar to the left */
+/*.gmxApplication_withLeftSidebar .iconSidebarControl .jspVerticalBar { left: 0; }*/
