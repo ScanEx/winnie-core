@@ -1,10 +1,11 @@
-var gulp = require('gulp');
-var concat = require('gulp-concat');
+var concat = require('gulp-concat')
+var iife = require('gulp-iife')
+var gulp = require('gulp')
 
 gulp.task('css', function() {
     return gulp.src('gmxApplication.css')
-        .pipe(gulp.dest('dist'));
-});
+        .pipe(gulp.dest('dist'))
+})
 
 gulp.task('js', function() {
     return gulp.src([
@@ -24,10 +25,11 @@ gulp.task('js', function() {
             'runtime/_footer.js'
         ])
         .pipe(concat('gmxApplication.js'))
-        .pipe(gulp.dest('dist'));
-});
+        .pipe(iife())
+        .pipe(gulp.dest('dist'))
+})
 
-gulp.task('default', ['js', 'css']);
+gulp.task('default', ['js', 'css'])
 
 gulp.task('watch', ['default'], function () {
     gulp.watch(['lib/*', 'runtime/*'], ['default'])

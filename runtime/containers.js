@@ -1,3 +1,14 @@
+function createFontIcon(iconClass, state) {
+    const iconEl = L.DomUtil.create('div', iconClass)
+    if (state === 'active') {
+        L.DomUtil.addClass(iconEl, 'icon_active')
+    }
+    if (state === 'disabled') {
+        L.DomUtil.addClass(iconEl, 'icon_disabled')
+    }
+    return iconEl
+}
+
 var ContainerView = Backbone.View.extend({
     addView: function(view) {
         this.view = view;
@@ -8,7 +19,11 @@ var ContainerView = Backbone.View.extend({
 
 // returns nsGmx.ScrollView
 function createScrollingSidebarTab(sidebarWidget, tabId, tabIcon, buttonPriority) {
-    var container = sidebarWidget.addTab(tabId, tabIcon, buttonPriority);
+    // var container = sidebarWidget.addTab(tabId, tabIcon, buttonPriority);
+    var container = sidebarWidget.setPane(tabId, {
+        createTab: function(state) { return createFontIcon(tabIcon, state) },
+        position: buttonPriority
+    })
     var scrollView = new nsGmx.ScrollView();
     scrollView.appendTo(container);
 

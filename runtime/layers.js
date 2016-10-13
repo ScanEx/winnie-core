@@ -220,7 +220,7 @@ cm.define('dateMapper', ['layersHash', 'calendar'], function(cm) {
     return null;
 
     function mapDate() {
-        for (layer in layersHash) {
+        for (var layer in layersHash) {
             if (layersHash.hasOwnProperty(layer)) {
                 layersHash[layer].setDateInterval && layersHash[layer].setDateInterval(calendar.get('dateBegin'), calendar.get(
                     'dateEnd'));
