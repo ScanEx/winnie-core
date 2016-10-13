@@ -64,9 +64,11 @@
 
 .gmxApplication_withRightSidebar.gmxApplication_sidebarShift .leaflet-right .leaflet-control { margin-right: 325px; }
 .gmxApplication_withRightSidebar.gmxApplication_sidebarShift .leaflet-right.leaflet-left .leaflet-control { margin-right: 0px; }
+.gmxApplication_withRightSidebar.gmxApplication_sidebarShift .iconSidebarControl-controlCorner .leaflet-control { margin-right: 0px; }
 
 .gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left .leaflet-control { margin-left: 325px; }
 .gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .leaflet-left.leaflet-right .leaflet-control { margin-left: 0px; }
+.gmxApplication_withLeftSidebar.gmxApplication_sidebarShift .iconSidebarControl-controlCorner .leaflet-control { margin-left: 0px; }
 
 .gmxApplication_sidebarShift .leaflet-right .calendarContainer.leaflet-control { margin-right: 10px; }
 .gmxApplication_sidebarShift .leaflet-left .calendarContainer.leaflet-control { margin-left: 10px; }
