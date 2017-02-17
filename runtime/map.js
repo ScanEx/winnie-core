@@ -42,9 +42,7 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
 
         initialize: function(options) {
             this.options = L.setOptions(this, options);
-            this._affects = {
-                initialConstraints: this.options.initialConstraints
-            }
+            this._affects = {};
             this._updateActiveArea();
         },
 
@@ -58,29 +56,17 @@ cm.define('mapActiveArea', ['config', 'map'], function(cm) {
             this._updateActiveArea();
         },
 
-        _redrawMap: function () {
-            // HACK: force redraw map to update objects that must be displayed or hidden
-            this.options.map.fire('moveend')
-        },
-
         _updateActiveArea: function() {
             var ao = Object.keys(this._affects).map(function(affectId) {
                 return this._affects[affectId]
             }.bind(this)).reduce(function(prev, curr) {
                 return sum(prev, curr)
-            }, {
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0
-            })
+            }, this.options.initialConstraints)
 
             this.options.map.setActiveArea(L.extend({
                 position: 'absolute',
                 border: this.options.showBorder ? '1px solid red' : 'none'
             }, ao));
-
-            this._redrawMap()
 
             function sum(a, b) {
                 var o = {};

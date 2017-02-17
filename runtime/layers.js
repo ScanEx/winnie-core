@@ -77,7 +77,6 @@ cm.define('layersMapper', ['config', 'map', 'layersHash', 'layersTree'], functio
                 return;
             }
             if (model.get('visible')) {
-                this._layersHash[id].removeFilter && this._layersHash[id].removeFilter();
                 this._map.addLayer(this._layersHash[id]);
             } else {
                 this._map.removeLayer(this._layersHash[id]);
@@ -227,4 +226,13 @@ cm.define('dateMapper', ['layersHash', 'calendar'], function(cm) {
             }
         }
     }
+});
+
+cm.define('gridAnalysis', ['config','gmxMap'], function(cm) {
+    var config = cm.get('config');
+    var gmxMap = cm.get('gmxMap');
+    if (config.app.gridAnalysis){
+        new nsGmx.GridAnalysis(gmxMap, config.app.gridAnalysis);
+    }
+    return null;
 });

@@ -5,7 +5,7 @@ cm.define('baseLayersControl', ['baseLayersManager', 'config', 'i18n', 'map'], f
     var map = cm.get('map');
 
     if (config.app.baseLayersControl && L.Control.GmxIconLayers) {
-        var ctrl = new L.Control.GmxIconLayers(baseLayersManager, L.extend({}, config.app.baseLayersControl, {
+        var ctrl = new L.Control.GmxIconLayers(baseLayersManager, L.extend(config.app.baseLayersControl, {
             language: i18n.getLanguage()
         }));
         map.addControl(ctrl);
@@ -162,4 +162,45 @@ cm.define('loaderStatusControl', ['map', 'config', 'i18n'], function(cm) {
     } else {
         return null;
     }
+});
+
+cm.define('transparencySliderWidget', ['config','map','gmxMap'], function(cm){ 
+    var config = cm.get('config');
+    var map = cm.get('map');
+	var gmxMap = cm.get('gmxMap');
+	
+	var SliderControl = L.Control.extend({
+        options: {
+            position: 'topleft'
+        },
+		setLayersOpacity: function (opacity){
+			var layers = gmxMap.getLayersHash();
+			Object.keys(layers).forEach(function (k) {
+				var layer = layers[k];
+				if(typeof layer.setRasterOpacity === 'function') {
+					layer.setRasterOpacity(opacity);
+				}
+			});        
+		},
+        onAdd: function(map) {
+            var sliderContainer = $('<div class="gmx-transparency-slider-control"></div>');
+            this._widget = new nsGmx.TransparencySliderWidget(sliderContainer);
+
+            $(this._widget).on('slide slidechange', function(event, ui) {
+                this.setLayersOpacity(ui.value);
+            }.bind(this));
+            return sliderContainer[0];
+        },
+        onRemove: function(){},
+        isCollapsed: function(){ return this._widget.isCollapsed(); }
+    });
+	
+	if (config.app.transparencySliderWidget) {
+		var sliderControl = new SliderControl();
+		map.addControl(sliderControl);
+		return sliderControl;
+	}
+	else {
+		return null;
+	}
 });
