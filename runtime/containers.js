@@ -6,9 +6,27 @@ var ContainerView = Backbone.View.extend({
     }
 });
 
+// function createTab (iconClass, hint) {
+//     return (state) => {
+//         var el = L.DomUtil.create('div', 'svgTabIcon');
+//         var svgEl = L.DomUtil.create('div', 'svgTabIcon-svg', el);
+//         hint && el.setAttribute('title', hint);
+//         if (state === 'active') {
+//              L.DomUtil.addClass(svgEl, iconClass + '_blue');
+//              L.DomUtil.addClass(el, 'svgTabIcon_active');
+//         } else {
+//              L.DomUtil.addClass(svgEl, iconClass);
+//         }
+//         L.DomUtil.addClass(svgEl, iconClass + '-dims');
+//         return el;
+//     };
+// }
+
 // returns nsGmx.ScrollView
 function createScrollingSidebarTab(sidebarWidget, tabId, tabIcon, buttonPriority) {
-    var container = sidebarWidget.addTab(tabId, tabIcon, buttonPriority);
+    
+    var container = sidebarWidget.setPane(tabId, { createTab: SvgTabFactory.createTab(tabIcon, buttonPriority)});
+        
     var scrollView = new nsGmx.ScrollView();
     scrollView.appendTo(container);
 
@@ -51,54 +69,73 @@ function createScrollingPage(fullscreenPagingPane, mobileButtonsPane, viewId, bu
     return scrollView;
 }
 
-cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 'map'], function(cm) {
-    var mapActiveArea = cm.get('mapActiveArea');
+function createCustomContainer(map) {
+    // хак, предназначенный для создания контейнеров для контролов, занимающих весь экран по ширине/высоте
+    var customPosName = 'right' + L.stamp({});
+    const controlCornerEl = L.DomUtil.create('div', 'leaflet-top leaflet-bottom leaflet-right', map._controlContainer);
+    L.DomUtil.addClass(controlCornerEl, 'iconSidebarControl-controlCorner');
+    L.DomEvent.disableClickPropagation(controlCornerEl);
+    L.DomEvent.disableScrollPropagation(controlCornerEl);
+    map._controlCorners[customPosName] = controlCornerEl;
+    return customPosName;
+}
+
+cm.define('sidebarWidget', [
+    // 'mapActiveArea', 
+    'container', 'resetter', 'config', 'map'], function(cm) {
+    // var mapActiveArea = cm.get('mapActiveArea');
     var rootContainer = cm.get('container');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
     var map = cm.get('map')
 
-    if (config.app.sidebarWidget && nsGmx.IconSidebarControl) {
-        var position = config.app.sidebarWidget.position || 'right';
-        L.DomUtil.addClass(rootContainer, position === 'right' ? 'gmxApplication_withRightSidebar' : 'gmxApplication_withLeftSidebar');
+    if (config.app.sidebarWidget && nsGmx.IconSidebarControl) {        
+        if ((typeof config.app.sidebarWidget === 'object') && config.app.sidebarWidget.position) {
+            L.DomUtil.addClass(rootContainer, config.app.sidebarWidget.position === 'right' ? 'gmxApplication_withRightSidebar' : 'gmxApplication_withLeftSidebar');
+        }
+        else {
+            config.app.sidebarWidget = {
+                position: createCustomContainer(map)
+            };            
+        }
 
         var sidebarControl = new nsGmx.IconSidebarControl(config.app.sidebarWidget);
         sidebarControl.addTo(map);
 
-        function addSidebarInitialAffect() {
-            if (config.app.sidebarWidget.position === 'left') {
-                mapActiveArea.addAffect('sidebar-widget', {
-                    left: '60px'
-                })
-            } else {
-                mapActiveArea.addAffect('sidebar-widget', {
-                    right: '60px'
-                })
-            }
-        }
+        // function addSidebarInitialAffect() {
+        //     if (config.app.sidebarWidget.position === 'left') {
+        //         mapActiveArea.addAffect('sidebar-widget', {
+        //             left: '60px'
+        //         })
+        //     } else {
+        //         mapActiveArea.addAffect('sidebar-widget', {
+        //             right: '60px'
+        //         })
+        //     }
+        // }
 
-        function removeSidebarInitialAffect() {
-            mapActiveArea.removeAffect('sidebar-widget');
-        }
+        // function removeSidebarInitialAffect() {
+        //     mapActiveArea.removeAffect('sidebar-widget');
+        // }
 
-        function addSidebarOpenedAffect() {
-            var width = $(sidebarControl.getContainer()).outerWidth()
-            if (config.app.sidebarWidget.position === 'left') {
-                mapActiveArea.addAffect('sidebar-widget-opened', {
-                    left: width + 20
-                })
-            } else {
-                mapActiveArea.addAffect('sidebar-widget-opened', {
-                    right: width + 20
-                })
-            }
-        }
+        // function addSidebarOpenedAffect() {
+        //     var width = $(sidebarControl.getContainer()).outerWidth()
+        //     if (config.app.sidebarWidget.position === 'left') {
+        //         mapActiveArea.addAffect('sidebar-widget-opened', {
+        //             left: width + 20
+        //         })
+        //     } else {
+        //         mapActiveArea.addAffect('sidebar-widget-opened', {
+        //             right: width + 20
+        //         })
+        //     }
+        // }
 
-        function removeSidebarOpenedAffect() {
-            mapActiveArea.removeAffect('sidebar-widget-opened')
-        }
+        // function removeSidebarOpenedAffect() {
+        //     mapActiveArea.removeAffect('sidebar-widget-opened')
+        // }
 
-        addSidebarInitialAffect();
+        // addSidebarInitialAffect();
 
         sidebarControl.on('opening', function() {
             resetter.reset();
@@ -110,14 +147,14 @@ cm.define('sidebarWidget', ['mapActiveArea', 'container', 'resetter', 'config', 
 
         sidebarControl.on('opened', function(ev) {
             $(rootContainer).addClass('gmxApplication_sidebarShift');
-            removeSidebarInitialAffect();
-            addSidebarOpenedAffect();
+            // removeSidebarInitialAffect();
+            // addSidebarOpenedAffect();
         });
 
         sidebarControl.on('closing', function() {
             $(rootContainer).removeClass('gmxApplication_sidebarShift');
-            removeSidebarOpenedAffect();
-            addSidebarInitialAffect();
+            // removeSidebarOpenedAffect();
+            // addSidebarInitialAffect();
         });
 
         if (nsGmx.Utils.isMobile()) {
@@ -293,9 +330,9 @@ cm.define('layersTreeWidgetContainer', ['fullscreenPagingPane', 'mobileButtonsPa
     }
 
     if (!nsGmx.Utils.isMobile()) {
-        return createScrollingSidebarTab(sidebarWidget, 'sidebarTab-layersTree', 'icon-layers', 30);
+        return createScrollingSidebarTab(sidebarWidget, 'sidebarTab-layersTree', 'svg-layers', 30);
     } else {
-        return createScrollingPage(fullscreenPagingPane, mobileButtonsPane, 'layersTreeWidget', 'icon-layers', 30);
+        return createScrollingPage(fullscreenPagingPane, mobileButtonsPane, 'layersTreeWidget', 'svg-layers', 30);
     }
 });
 

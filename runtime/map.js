@@ -20,72 +20,72 @@ cm.define('map', ['permalinkManager', 'container', 'resetter', 'config'], functi
     return map;
 });
 
-cm.define('mapActiveArea', ['config', 'map'], function(cm) {
-    var config = cm.get('config');
-    var cfg = config.app && config.app.mapActiveArea;
+// cm.define('mapActiveArea', ['config', 'map'], function(cm) {
+//     var config = cm.get('config');
+//     var cfg = config.app && config.app.mapActiveArea;
 
-    if (!cm.get('map').setActiveArea || cfg === false) {
-        return false;
-    }
+//     if (!cm.get('map').setActiveArea || cfg === false) {
+//         return false;
+//     }
 
-    var laa = new(L.Class.extend({
-        options: {
-            initialConstraints: {
-                top: 10,
-                bottom: 10,
-                left: 10,
-                right: 10
-            },
+//     var laa = new(L.Class.extend({
+//         options: {
+//             initialConstraints: {
+//                 top: 10,
+//                 bottom: 10,
+//                 left: 10,
+//                 right: 10
+//             },
 
-            showBorder: false
-        },
+//             showBorder: false
+//         },
 
-        initialize: function(options) {
-            this.options = L.setOptions(this, options);
-            this._affects = {};
-            this._updateActiveArea();
-        },
+//         initialize: function(options) {
+//             this.options = L.setOptions(this, options);
+//             this._affects = {};
+//             this._updateActiveArea();
+//         },
 
-        addAffect: function(id, props) {
-            this._affects[id] = props;
-            this._updateActiveArea();
-        },
+//         addAffect: function(id, props) {
+//             this._affects[id] = props;
+//             this._updateActiveArea();
+//         },
 
-        removeAffect: function(id) {
-            delete this._affects[id];
-            this._updateActiveArea();
-        },
+//         removeAffect: function(id) {
+//             delete this._affects[id];
+//             this._updateActiveArea();
+//         },
 
-        _updateActiveArea: function() {
-            var ao = Object.keys(this._affects).map(function(affectId) {
-                return this._affects[affectId]
-            }.bind(this)).reduce(function(prev, curr) {
-                return sum(prev, curr)
-            }, this.options.initialConstraints)
+//         _updateActiveArea: function() {
+//             var ao = Object.keys(this._affects).map(function(affectId) {
+//                 return this._affects[affectId]
+//             }.bind(this)).reduce(function(prev, curr) {
+//                 return sum(prev, curr)
+//             }, this.options.initialConstraints)
 
-            this.options.map.setActiveArea(L.extend({
-                position: 'absolute',
-                border: this.options.showBorder ? '1px solid red' : 'none'
-            }, ao));
+//             this.options.map.setActiveArea(L.extend({
+//                 position: 'absolute',
+//                 border: this.options.showBorder ? '1px solid red' : 'none'
+//             }, ao));
 
-            function sum(a, b) {
-                var o = {};
-                ['top', 'left', 'bottom', 'right'].map(function(direction) {
-                    a[direction] = a[direction] + '';
-                    var da = (a[direction].match(/\d+/) && a[direction].match(/\d+/)[0]) || 0;
-                    b[direction] = b[direction] + '';
-                    var db = (b[direction].match(/\d+/) && b[direction].match(/\d+/)[0]) || 0;
-                    o[direction] = (da / 1 + db / 1) + 'px';
-                });
-                return o;
-            }
-        }
-    }))(L.extend(cfg || {}, {
-        map: cm.get('map')
-    }));
+//             function sum(a, b) {
+//                 var o = {};
+//                 ['top', 'left', 'bottom', 'right'].map(function(direction) {
+//                     a[direction] = a[direction] + '';
+//                     var da = (a[direction].match(/\d+/) && a[direction].match(/\d+/)[0]) || 0;
+//                     b[direction] = b[direction] + '';
+//                     var db = (b[direction].match(/\d+/) && b[direction].match(/\d+/)[0]) || 0;
+//                     o[direction] = (da / 1 + db / 1) + 'px';
+//                 });
+//                 return o;
+//             }
+//         }
+//     }))(L.extend(cfg || {}, {
+//         map: cm.get('map')
+//     }));
 
-    return laa;
-});
+//     return laa;
+// });
 
 // TODO: use controls manager
 cm.define('mapLayoutHelper', ['map'], function(cm) {
@@ -297,9 +297,11 @@ cm.define('drawingManager', ['permalinkManager', 'map'], function(cm, cb) {
     return drawingManager;
 });
 
-cm.define('mobilePopups', ['mapLayoutHelper', 'mapActiveArea', 'layersMapper', 'layersHash', 'resetter', 'map'], function(cm) {
+cm.define('mobilePopups', ['mapLayoutHelper', 
+// 'mapActiveArea', 
+'layersMapper', 'layersHash', 'resetter', 'map'], function(cm) {
     var mapLayoutHelper = cm.get('mapLayoutHelper');
-    var mapActiveArea = cm.get('mapActiveArea');
+    // var mapActiveArea = cm.get('mapActiveArea');
     var layersHash = cm.get('layersHash');
     var resetter = cm.get('resetter');
     var config = cm.get('config');
@@ -367,9 +369,9 @@ cm.define('mobilePopups', ['mapLayoutHelper', 'mapActiveArea', 'layersMapper', '
             infoControl.render(balloonHtml);
             infoControl.show();
             mapLayoutHelper.hideBottomControls();
-            mapActiveArea.addAffect('mobilepopup', {
-                bottom: infoControl.getContainer().scrollHeight + 'px'
-            });
+            // mapActiveArea.addAffect('mobilepopup', {
+            //     bottom: infoControl.getContainer().scrollHeight + 'px'
+            // });
             map.setView(ev.latlng);
             evBus.fire('shown');
         });
@@ -379,7 +381,7 @@ cm.define('mobilePopups', ['mapLayoutHelper', 'mapActiveArea', 'layersMapper', '
         if (popupIsActive) {
             infoControl.hide();
             mapLayoutHelper.showBottomControls();
-            mapActiveArea.removeAffect('mobilepopup');
+            // mapActiveArea.removeAffect('mobilepopup');
         }
         evBus.fire('hidden');
     });
