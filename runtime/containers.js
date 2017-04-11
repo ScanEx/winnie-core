@@ -155,11 +155,7 @@ cm.define('sidebarWidget', [
             $(rootContainer).removeClass('gmxApplication_sidebarShift');
             // removeSidebarOpenedAffect();
             // addSidebarInitialAffect();
-        });
-
-        if (nsGmx.Utils.isMobile()) {
-            sidebarControl.setMode('mobile');
-        }
+        });       
 
         sidebarControl.on('stick', function(e) {
             [

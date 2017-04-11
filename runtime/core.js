@@ -14,7 +14,8 @@ cm.define('config', [], function(cm, cb) {
                     center: [53, 82],
                     zoom: 3,
                     zoomControl: false,
-                    attributionControl: false
+                    attributionControl: false,
+                    contextmenu: true
                 },
                 gmxMap: {
                     setZIndex: true
@@ -64,7 +65,7 @@ cm.define('config', [], function(cm, cb) {
                 try {
                     var config = JSON.parse(pe.currentTarget.response || pe.currentTarget.responseText);
                 } catch (e) {
-                    console.error('invalid config');
+                    console.log('invalid config');
                 }
                 if (config) {
                     cb(setDefaults(config));
@@ -72,13 +73,13 @@ cm.define('config', [], function(cm, cb) {
                     cb(false);
                 }
             } else {
-                console.error('failed to load config');
+                console.log('failed to load config');
                 cb(false);
             }
         });
         xhr.send();
     } else {
-        console.error('invalid config argument');
+        console.log('invalid config argument');
         cb(false);
     }
 });

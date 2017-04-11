@@ -196,7 +196,7 @@ cm.define('gmxMap', ['map', 'i18n', 'config'], function(cm, cb) {
                 });
             });
         } catch (e) {
-            console.error(e);
+            console.log(e);
             cb(createEmptyMap());
         }
     } else {
@@ -234,7 +234,7 @@ cm.define('gmxMapErrorHandler', ['gmxMap', 'logger'], function(cm) {
     var gmxMap = cm.get('gmxMap');
     if (gmxMap.error) {
         logger.log(gmxMap.error);
-        console.error(gmxMap.error);
+        console.log(gmxMap.error);
     }
     return null;
 });
